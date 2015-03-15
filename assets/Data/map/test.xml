@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<map xmlns="caveyard.map"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="caveyard.map
+                         ../../../xml-resources/jaxb/XMLMap/mapSchema.xsd">
+
+    <cells>
+        <cell x="0" z="0" size_x="40" size_z="40">
+            <file>Models/landscape_test2/landscape_test2_split.j3o</file>
+            <offset x="-20" z="-20"/>
+        </cell>
+        <cell x="0" z="-40" size_x="40" size_z="40">
+            <file>Models/landscape_test2/landscape_test2_split.j3o</file>
+            <offset x="-20" z="-20"/>
+        </cell>
+        <cell x="-40" z="0" size_x="40" size_z="40">
+            <file>Models/landscape_test2/landscape_test2_split.j3o</file>
+            <node>Tests</node>
+            <offset x="-20" z="-20"/>
+        </cell>
+        <cell x="-40" z="-40" size_x="40" size_z="40">
+            <file>Models/landscape_test2/landscape_test2_split.j3o</file>
+            <offset x="-20" z="-20"/>
+        </cell>
+        <cell x="1" z="3" size_x="2" size_z="1">
+            <file>Models/misc/Tür.j3o</file>
+            <offset x="-3"/>
+        </cell>
+    </cells>
+</map>
