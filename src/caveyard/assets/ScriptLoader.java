@@ -14,7 +14,6 @@ public class ScriptLoader implements AssetLoader
 
     public Object load(AssetInfo assetInfo) throws IOException
     {
-        // TODO: This is a stub, should return a usable Script object not a String!
         Scanner scanner = new Scanner(assetInfo.openStream());
         StringBuilder builder = new StringBuilder();
         

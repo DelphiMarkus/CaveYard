@@ -1,6 +1,6 @@
 package caveyard.map;
 
-import caveyard.map.xml.MapType;
+import caveyard.xml.map.MapType;
 import com.jme3.asset.AssetInfo;
 import com.jme3.asset.AssetKey;
 import com.jme3.asset.AssetManager;

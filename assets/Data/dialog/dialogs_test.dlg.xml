@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+
+<dialogs xmlns="caveyard.dialog">
+
+    <dialog id="dialog1" start="choice_start">
+
+        <load>test1.js</load> <!-- A javascript file to load / evaluate before start talking -->
+
+        <variables>
+            <var name="gruss" default="false" />
+        </variables>
+
+        <persons>
+            <person ext_id="__PLAYER__" id="p"/>
+            <person ext_id="c0_p_haendler_karl" id="k"/>
+        </persons>
+
+        <speech>
+            <sequence id="seq_first_greeting">
+                <text by="k">Hallo! Du bist wohl neu hier, was?</text>
+                <action next="menu1" />
+            </sequence>
+
+            <sequence id="seq_greeting">
+                <text by="k">Hallo!</text>
+                <action next="menu1" />
+            </sequence>
+
+            <choice id="choice_start" auto="true">
+                <option condition="!gruss" next="seq_first_greeting" />
+                <option condition="__ELSE__" next="seq_greeting"/>
+            </choice>
+
+
+            <sequence id="seq_hand_first">
+                <text by="k">Du möchtest, dass wir uns die Hand geben?</text>
+                <text by="k">Gut, es kann ja nicht schaden.</text>
+                <script>gruss = true;</script>
+                <action next="seq_hand" />
+            </sequence>
+
+            <sequence id="seq_hand_next">
+                <text by="k">Was? Du möchtest nochmal die Hände schütteln?</text>
+                <text by="k">Hm... Nagut.</text>
+                <action next="seq_hand" />
+            </sequence>
+
+            <sequence id="seq_hand">
+                <script>haendeSchuetteln();</script>
+                <text by="p">Das war erleichternd.</text>
+            </sequence>
+
+            <menu id="menu1">
+                <option condition="!gruss" next="seq_hand_first">Lass uns die Hände schütteln!</option>
+                <option condition="gruss" next="seq_hand_next">(Hand schütteln)</option>
+                <option next="seq_exit" exit="true">Auf Wiedersehen!</option>
+            </menu>
+
+            <sequence id="seq_exit">
+                <text by="k">Auf Wiedersehen!</text>
+            </sequence>
+        </speech>
+    </dialog>
+</dialogs>

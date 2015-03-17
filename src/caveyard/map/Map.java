@@ -1,7 +1,7 @@
 package caveyard.map;
 
-import caveyard.map.xml.CellType;
-import caveyard.map.xml.MapType;
+import caveyard.xml.map.CellType;
+import caveyard.xml.map.MapType;
 import caveyard.map.math.Area;
 import caveyard.map.math.Rect;
 import com.jme3.asset.AssetManager;
@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  *
  * @author Maximilian Timmerkamp <>
  */
-public class Map extends Node
+public class Map
 {
 	protected static Logger logger = Logger.getLogger(Map.class.getName());
 	protected AssetManager assetManager;
@@ -24,7 +24,7 @@ public class Map extends Node
 	//protected CellTree cellTree;
 	protected ArrayList<Cell> cells;
 
-    protected Node hiddenCells;
+    protected Node attachedNodes;
     protected Node visibleCells;
     
     public Map(AssetManager assetManager)
@@ -34,13 +34,11 @@ public class Map extends Node
 		//cellTree = new CellTree();
 		cells = new ArrayList<>();
 
-        hiddenCells = new Node("hiddenCells");
+        attachedNodes = new Node("attachedNodes");
         visibleCells = new Node("visibleCells");
-        
-        this.attachChild(visibleCells);
     }
 
-    protected void addCell(Rect rect, Cell cell)
+    protected void addCell(Cell cell)
     {
 		//cellTree.insert(rect, cell);
 		cells.add(cell);
@@ -66,7 +64,7 @@ public class Map extends Node
 	 *
 	 * @return A map loaded from XML.
 	 */
-	protected static Map load(MapType xmlMap, AssetManager assetManager)
+	public static Map load(MapType xmlMap, AssetManager assetManager)
 	{
 		Map map = new Map(assetManager);
 
@@ -86,9 +84,22 @@ public class Map extends Node
 				cell.setNodeOffset(nodeOffset);
 			}
 
-			map.addCell(rect, cell);
+			map.addCell(cell);
 		}
 
 		return map;
+	}
+
+
+	public void attachTo(Node node)
+	{
+		node.attachChild(visibleCells);
+		attachedNodes.attachChild(node);
+	}
+
+	public void detachFrom(Node node)
+	{
+		node.detachChild(visibleCells);
+		attachedNodes.detachChild(node);
 	}
 }

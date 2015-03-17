@@ -1,5 +1,6 @@
 package caveyard.script;
 
+import caveyard.assets.ScriptKey;
 import com.jme3.asset.AssetManager;
 
 /**
@@ -26,7 +27,7 @@ public class ScriptManager
     {
         
         name = scriptPath + name;
-        return (String) assetManager.loadAsset(name);
+        return assetManager.loadAsset(new ScriptKey(name));
     }
     
     

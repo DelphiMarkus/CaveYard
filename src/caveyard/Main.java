@@ -1,7 +1,10 @@
 package caveyard;
 
+import caveyard.assets.MapKey;
+import caveyard.assets.ScriptLoader;
 import caveyard.map.Map;
 import caveyard.map.MapControl;
+import caveyard.assets.MapLoader;
 import caveyard.map.MapManager;
 import com.jme3.app.SimpleApplication;
 import com.jme3.light.DirectionalLight;
@@ -39,9 +42,17 @@ public class Main extends SimpleApplication
 		app.start();
 	}
 
+	private void initLoaders()
+	{
+		assetManager.registerLoader(ScriptLoader.class, "js");
+		assetManager.registerLoader(MapLoader.class, "map.xml");
+	}
+
 	@Override
 	public void simpleInitApp()
 	{
+		initLoaders();
+
 		initTestMap();
 
 		/*assetManager.registerLoader(ScriptLoader.class, new String[] {"js"});
@@ -52,11 +63,12 @@ public class Main extends SimpleApplication
 
 	private void initTestMap()
 	{
-		mapManager = new MapManager(assetManager);
+		//mapManager = new MapManager(assetManager);
 		logger.info("Loading map...");
-		currentMap = mapManager.loadMap("Data/map/test.xml");
+		//currentMap = mapManager.loadMap("Data/map/test.map.xml");
+		currentMap = (Map) assetManager.loadAsset(new MapKey("Data/map/test.map.xml"));
 		logger.fine("Map loaded!");
-		rootNode.attachChild(currentMap);
+		currentMap.attachTo(rootNode);
 
 		player = new Node("Player");
 		rootNode.attachChild(player);
