@@ -4,10 +4,11 @@
 
     <dialog id="dialog1" start="choice_start">
 
-        <load>test1.js</load> <!-- A javascript file to load / evaluate before start talking -->
+        <load>assets/Scripts/test1.js</load> <!-- A javascript file to load / evaluate before start talking -->
 
         <variables>
-            <var name="gruss" default="false" />
+            <var name="first_meeting" default="true" />
+            <var name="gruss" default="false"/>
         </variables>
 
         <persons>
@@ -18,6 +19,7 @@
         <speech>
             <sequence id="seq_first_greeting">
                 <text by="k">Hallo! Du bist wohl neu hier, was?</text>
+                <script>first_meeting = false;</script>
                 <action next="menu1" />
             </sequence>
 
@@ -27,7 +29,7 @@
             </sequence>
 
             <choice id="choice_start" auto="true">
-                <option condition="!gruss" next="seq_first_greeting" />
+                <option condition="first_meeting" next="seq_first_greeting" />
                 <option condition="__ELSE__" next="seq_greeting"/>
             </choice>
 
