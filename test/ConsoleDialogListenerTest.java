@@ -1,6 +1,6 @@
 import caveyard.dialog.DialogListener;
-import caveyard.dialog.DialogPerson;
 import caveyard.dialog.DialogPlayer;
+import caveyard.dialog.DialogText;
 import caveyard.xml.dialog.Dialogs;
 
 import javax.script.*;
@@ -16,29 +16,17 @@ import java.util.Scanner;
  */
 public class ConsoleDialogListenerTest implements DialogListener
 {
-	protected ScriptEngine engine;
-	protected ScriptContext context;
-	protected Bindings engineScope;
-
 	protected DialogPlayer player;
 	protected boolean running = false;
 
 	public ConsoleDialogListenerTest(File file, ScriptEngine engine)
 	{
-		this.engine = engine;
-
-		//engineScope = new SimpleBindings();
-		engineScope = engine.createBindings();
-
-		context = new SimpleScriptContext();
-		context.setBindings(engineScope, ScriptContext.ENGINE_SCOPE);
-
 		Dialogs dialogs = JAXB.unmarshal(file, Dialogs.class);
-		player = new DialogPlayer(dialogs.getDialog().get(0));
 
+		player = new DialogPlayer(dialogs.getDialog().get(0), engine);
 		player.setListener(this);
 	}
-	
+
 	public void run()
 	{
 		for (int i = 0; i < 2; i++)
@@ -53,9 +41,9 @@ public class ConsoleDialogListenerTest implements DialogListener
 	}
 
 	@Override
-	public void displayText(String text, DialogPerson person)
+	public void displayText(DialogText text)
 	{
-		System.out.println(person.getExternalName() + ": " + text);
+		System.out.println(text.getSpeaker().getExternalName() + ": " + text.getText());
 	}
 
 	@Override
@@ -100,66 +88,6 @@ public class ConsoleDialogListenerTest implements DialogListener
 		running = false;
 		System.out.println("\nDialog ended.\n.............................................................\n");
 	}
-
-	@Override
-	public void loadScript(String filename)
-	{
-		try
-		{
-			Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
-			engine.eval(reader, context);
-		}
-		catch (FileNotFoundException | ScriptException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void evaluateScript(String script)
-	{
-		try
-		{
-			engine.eval(script, context);
-		}
-		catch (ScriptException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public boolean evaluateCondition(String condition)
-	{
-		try
-		{
-			Object result = engine.eval(condition, context);
-			return (Boolean) result;
-		}
-		catch (ScriptException e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException("Cannot evaluate condition \"" + condition + "\".", e);
-		}
-	}
-
-	@Override
-	public void initVariableValue(String var, String expr, boolean isPersistent)
-	{
-		if (!isPersistent && engineScope.containsKey(var) || !engineScope.containsKey(var))
-		{
-			try
-			{
-				Object value = engine.eval(expr, context);
-				engineScope.put(var, value);
-			}
-			catch (ScriptException e)
-			{
-				e.printStackTrace();
-			}
-		}
-	}
-
 
 	public static void main(String[] args)
 	{

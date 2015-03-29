@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema version="1.0"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="caveyard.dialog"
+           targetNamespace="caveyard.dialog"
+           elementFormDefault="qualified">
+
+    <xs:element name="dialogs">
+        <xs:annotation>
+            <xs:documentation>
+                Contains several dialogs.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="dialog" type="dialogType" minOccurs="1" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+
+        <xs:unique name="dialogID">
+            <xs:selector xpath="dialog"/>
+            <xs:field xpath="@id"/>
+        </xs:unique>
+    </xs:element>
+
+    <xs:complexType name="dialogType">
+        <xs:annotation>
+            <xs:documentation>
+                A <code>dialog</code> element contains all information about a specific dialog.
+                <ul>
+                    <li><code>id</code> is a unique ID identifying this dialog.</li>
+                    <li><code>start</code> specifies which dialog part (sequence, menu, choice) is
+                        passed control to then entering the dialog.</li>
+                </ul>
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:all minOccurs="1">
+            <xs:element name="load" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Specifies one java script file to load (evaluate) before starting the dialog.
+                        This can provide additional functions or specify non-persistent variables.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="variables" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Contains all variable specifiers.
+                    </xs:documentation>
+                </xs:annotation>
+
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="var" type="varType" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="persons" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Contains all person definitions.
+                    </xs:documentation>
+                </xs:annotation>
+
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="person" type="personType" minOccurs="1" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="speech" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Contains text and structure of a dialog.
+                    </xs:documentation>
+                </xs:annotation>
+
+                <xs:complexType>
+                    <xs:choice minOccurs="1" maxOccurs="unbounded">
+                        <xs:element name="sequence" type="sequenceType" maxOccurs="unbounded"/>
+                        <xs:element name="menu" type="menuType" maxOccurs="unbounded"/>
+                        <xs:element name="choice" type="choiceType" maxOccurs="unbounded"/>
+                    </xs:choice>
+                </xs:complexType>
+
+                <xs:unique name="dialogPartID">
+                    <xs:selector xpath="sequence|menu|choice"/>
+                    <xs:field xpath="@id"/>
+                </xs:unique>
+            </xs:element>
+        </xs:all>
+
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:attribute name="start" type="xs:string" use="required"/>
+    </xs:complexType>
+
+
+    <xs:complexType name="dialogPartType">
+        <xs:annotation>
+            <xs:documentation>
+                This is the super-type for all sequences, menus and choices.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:attribute name="id" type="xs:string" use="required"/>
+    </xs:complexType>
+
+
+    <xs:complexType name="personType">
+        <xs:annotation>
+            <xs:documentation>
+                This element links names used for persons in the dialog definition to their representation
+                in the game engine. <code>id</code> specifies the identifier used to refer to this person
+                in the current dialog. <code>ext_id</code> identifies the person in the world outside the
+                dialog.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:attribute name="ext_id" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="varType">
+        <xs:annotation>
+            <xs:documentation>
+                This element describes a variable which can be saved when the dialog ends. The
+                attribute <code>default</code> may consist of any java script expression. It will only be
+                evaluated if the variable is initiated the first time.
+                <p><code>persistent</code> specifies if a variable is saved. This can be used to remember
+                dialog-specific states to adapt a future occurrence of this dialog. Every variable is
+                persistent by default.</p>
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="persistent" type="xs:boolean" default="true"/>
+        <xs:attribute name="default" type="xs:string"/>
+    </xs:complexType>
+
+
+    <xs:complexType name="sequenceType">
+        <xs:annotation>
+            <xs:documentation>
+                A <code>sequence</code> describes multiple parts of a dialog which happen
+                in a specific order. This can contain speech, a script to change the current
+                state or open up a menu.
+                <ul>
+                    <li><code>text</code> adds speech</li>
+                    <li><code>script</code> accepts a java script program (may be a single line) to be executed.</li>
+                    <li><code>action</code> passes control to menus, choices and other sequences.</li>
+                </ul>
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:complexContent>
+            <xs:extension base="dialogPartType">
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element name="text" type="textType"/>
+                    <xs:element name="script" type="scriptType"/>
+                    <xs:element name="action" type="actionType"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="menuType">
+        <xs:annotation>
+            <xs:documentation>
+                <p>In a <code>menu</code> the player can choose what to say next. If the sub-dialog
+                    is finished, the game will return to this element and deciding what to do next.
+                    (If not let the player decide).</p>
+                <p>If used as a <code>choice</code> does not loop back to this dialog part.</p>
+                <p>
+                    <ul>
+                        <li><code>id</code> is required and must be unique to identify among all
+                            other dialog parts.</li>
+                        <li><code>auto</code> indicates if an appropriate entry is chosen
+                            automatically. If so, the player has no (direct) control over this
+                            decision.</li>
+                    </ul>
+                </p>
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:complexContent>
+            <xs:extension base="dialogPartType">
+                <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                    <xs:element name="option" type="optionType"/>
+                </xs:sequence>
+
+                <xs:attribute name="auto" type="xs:boolean" default="false" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="choiceType">
+        <xs:complexContent>
+            <xs:restriction base="menuType">
+                <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                    <xs:element name="option" type="choiceOptionType"/>
+                </xs:sequence>
+            </xs:restriction>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="optionType">
+        <xs:annotation>
+            <xs:documentation>
+                An Option can be chosen by the player. The value of this element is a string
+                describing what is displayed to the player. If an option has no value, it is not displayed.
+                <ul>
+                    <li><code>condition</code> specifies when this option is displayed. The expression must be
+                        evaluable by a java script interpreter and should return a boolean.</li>
+                    <li><code>next</code> specifies which part of the current dialog is evaluated when this
+                        option was chosen.</li>
+                    <li><code>exit</code> specifies if this option exits the menu. This attribute is not
+                        allowed when used in a <code>choice</code> element.</li>
+                </ul>
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="condition" type="xs:string"/>
+                <xs:attribute name="next" type="xs:string"/>
+                <xs:attribute name="exit" type="xs:boolean" default="false" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="choiceOptionType">
+        <xs:simpleContent>
+            <xs:restriction base="optionType">
+                <xs:attribute name="condition" type="xs:string" use="required"/>
+                <xs:attribute name="exit" type="xs:boolean" use="prohibited"/>
+            </xs:restriction>
+        </xs:simpleContent>
+    </xs:complexType>
+
+
+    <xs:complexType name="actionType">
+        <xs:annotation>
+            <xs:documentation>
+                The specified action is executed when this element is reached.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:attribute name="next" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="textType">
+        <xs:annotation>
+            <xs:documentation>
+                Contains text which is said by a character specified by attribute <code>by</code>.
+                You can specify a <code>condition</code> which determines when to use/show this text.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="by" type="xs:string" use="required"/>
+                <xs:attribute name="condition" type="xs:string"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="scriptType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string"/>
+        </xs:simpleContent>
+    </xs:complexType>
+
+</xs:schema>
