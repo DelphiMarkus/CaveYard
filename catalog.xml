@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
+    <system systemId="file:/home/maximilian/Java/CaveYard/assets/Data/mapSchema.xsd" uri="xml-resources/jaxb/XMLMap/mapSchema.xsd"/>
+    <system systemId="file:/home/maximilian/Java/CaveYard/assets/Data/dialog.xsd" uri="xml-resources/jaxb/dialog/dialog.xsd"/>
+    <system systemId="file:/home/maximilian/Java/CaveYard/assets/Data/schemas/mapSchema.xsd" uri="xml-resources/jaxb/XMLMap/mapSchema.xsd"/>
+    <system systemId="file:/home/maximilian/Java/CaveYard/assets/Data/schemas/dialog.xsd" uri="xml-resources/jaxb/dialog/dialog.xsd"/>
+    <system systemId="file:/home/maximilian/Java/CaveYard/assets/Data/schemas/mapsSchema.xsd" uri="xml-resources/jaxb/MapsListing/mapsSchema.xsd"/>
+</catalog>

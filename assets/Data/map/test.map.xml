@@ -3,7 +3,7 @@
 <map xmlns="caveyard.map"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="caveyard.map
-                         ../../../xml-resources/jaxb/XMLMap/mapSchema.xsd">
+                         ../schemas/mapSchema.xsd">
 
     <cells>
         <cell x="0" z="0" size_x="40" size_z="40">

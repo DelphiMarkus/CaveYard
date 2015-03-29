@@ -1,20 +1,30 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <schemas xmlns='http://xml.netbeans.org/schema/JAXBWizConfig' destdir='build/generated-sources/jaxb' projectName='CaveYard' version='1.0'>
-	<schema type='-xmlschema' package='caveyard.xml.dialog' name='dialog'>
+	<schema type='-xmlschema' package='caveyard.xml.map' name='MapDefinition'>
 		<xjc-options>
 		</xjc-options>
 		<schema-sources>
-			<schema-source location='xml-resources/jaxb/dialog/dialog.xsd' origLocation='assets/Data/schemas/dialog.xsd'/>
+			<schema-source location='xml-resources/jaxb/MapDefinition/mapSchema.xsd' origLocation='assets/Data/schemas/mapSchema.xsd'/>
 		</schema-sources>
 		<bindings>
 		</bindings>
 		<catalog/>
 	</schema>
-	<schema type='-xmlschema' package='caveyard.xml.map' name='XMLMap'>
+	<schema type='-xmlschema' package='caveyard.xml.dialog' name='DialogDefinition'>
 		<xjc-options>
 		</xjc-options>
 		<schema-sources>
-			<schema-source location='xml-resources/jaxb/XMLMap/mapSchema.xsd' origLocation='assets/Data/schemas/mapSchema.xsd'/>
+			<schema-source location='xml-resources/jaxb/DialogDefinition/dialog.xsd' origLocation='assets/Data/schemas/dialog.xsd'/>
+		</schema-sources>
+		<bindings>
+		</bindings>
+		<catalog/>
+	</schema>
+	<schema type='-xmlschema' package='caveyard.xml.maps' name='MapsListing'>
+		<xjc-options>
+		</xjc-options>
+		<schema-sources>
+			<schema-source location='xml-resources/jaxb/MapsListing/mapsSchema.xsd' origLocation='assets/Data/schemas/mapsSchema.xsd'/>
 		</schema-sources>
 		<bindings>
 		</bindings>

@@ -18,6 +18,8 @@ import com.jme3.scene.control.LightControl;
 import com.jme3.shadow.PointLightShadowFilter;
 import com.jme3.shadow.PointLightShadowRenderer;
 
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -40,6 +42,8 @@ public class Main extends SimpleApplication
 	{
 		Main app = new Main();
 		app.start();
+
+		//ConsoleDialogListenerTest.main(args);
 	}
 
 	private void initLoaders()
@@ -51,22 +55,27 @@ public class Main extends SimpleApplication
 	@Override
 	public void simpleInitApp()
 	{
+		Logger rootLogger = Logger.getLogger("caveyard");
+		rootLogger.setLevel(Level.FINER);
+		rootLogger.setUseParentHandlers(false);
+		ConsoleHandler consoleHandler = new ConsoleHandler();
+		consoleHandler.setLevel(Level.FINER);
+		rootLogger.addHandler(consoleHandler);
+
+
+		logger.fine("TEST!");
+
 		initLoaders();
+		mapManager = MapManager.getInstance(assetManager);
 
 		initTestMap();
-
-		/*assetManager.registerLoader(ScriptLoader.class, new String[] {"js"});
-
-		 Object s = assetManager.loadAsset("Scripts/test1.js");
-		 if (s instanceof String) System.out.println((String) s);*/
 	}
 
 	private void initTestMap()
 	{
-		//mapManager = new MapManager(assetManager);
 		logger.info("Loading map...");
-		//currentMap = mapManager.loadMap("Data/map/test.map.xml");
-		currentMap = (Map) assetManager.loadAsset(new MapKey("Data/map/test.map.xml"));
+		currentMap = mapManager.loadMap("test_map1");
+		//currentMap = (Map) assetManager.loadAsset(new MapKey("Data/map/test.map.xml"));
 		logger.fine("Map loaded!");
 		currentMap.attachTo(rootNode);
 

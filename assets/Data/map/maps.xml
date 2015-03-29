@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<maps xmlns="caveyard.maps">
+    <map id="test_map1" file="Data/map/test.map.xml"/>
+</maps>
