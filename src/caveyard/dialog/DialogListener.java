@@ -30,5 +30,5 @@ public interface DialogListener
 	/**
 	 * This method is called when the dialog ended. It is possible to restart it again.
 	 */
-	void dialogEnded();
+	void onDialogEnded();
 }

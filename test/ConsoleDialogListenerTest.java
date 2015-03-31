@@ -83,7 +83,7 @@ public class ConsoleDialogListenerTest implements DialogListener
 	}
 
 	@Override
-	public void dialogEnded()
+	public void onDialogEnded()
 	{
 		running = false;
 		System.out.println("\nDialog ended.\n.............................................................\n");

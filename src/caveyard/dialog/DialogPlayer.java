@@ -8,8 +8,8 @@ import java.util.*;
 import java.util.logging.Logger;
 
 /**
- * A DialogPlayer can play a dialog. A {@link DialogListener} is required
- * to communicate with the game to display the dialog or to get input
+ * A DialogPlayer plays (or interprets) a dialog. A {@link DialogListener} is
+ * required to communicate with the game to display the dialog or to get input
  * from outside the dialog simulation.
  *
  * This player works like an interpreter. After each communication with the
@@ -341,7 +341,7 @@ public class DialogPlayer
 			else // stop dialog if stack is empty.
 			{
 				state = PlayerState.STOPPED;
-				listener.dialogEnded();
+				listener.onDialogEnded();
 				break;
 			}
 		}

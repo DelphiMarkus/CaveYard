@@ -1,6 +1,5 @@
 package caveyard;
 
-import caveyard.assets.MapKey;
 import caveyard.assets.ScriptLoader;
 import caveyard.map.Map;
 import caveyard.map.MapControl;
@@ -62,9 +61,6 @@ public class Main extends SimpleApplication
 		consoleHandler.setLevel(Level.FINER);
 		rootLogger.addHandler(consoleHandler);
 
-
-		logger.fine("TEST!");
-
 		initLoaders();
 		mapManager = MapManager.getInstance(assetManager);
 
@@ -75,7 +71,6 @@ public class Main extends SimpleApplication
 	{
 		logger.info("Loading map...");
 		currentMap = mapManager.loadMap("test_map1");
-		//currentMap = (Map) assetManager.loadAsset(new MapKey("Data/map/test.map.xml"));
 		logger.fine("Map loaded!");
 		currentMap.attachTo(rootNode);
 
@@ -98,7 +93,7 @@ public class Main extends SimpleApplication
 		LightControl playerLightControl = new LightControl(playerLight, LightControl.ControlDirection.SpatialToLight);
 		lightNode.addControl(playerLightControl);
 
-
+		// create a map control to update visible cells
 		MapControl mapControl = new MapControl(currentMap, 15, 0.25f);
 		player.addControl(mapControl);
 
