@@ -10,6 +10,7 @@ java JVMARGS -jar ${application.title}.jar
         <replace file="${application.title}.sh" token="JVMARGS" value="${run.jvmargs}"/>
         <zip destfile="${dist.dir}/${application.title}-Linux.zip">
             <zipfileset file="${application.title}.sh" filemode="755" prefix=""/>
+            <zipfileset file="logging.properties" prefix=""/>
             <zipfileset file="${dist.jar}" prefix=""/>
             <zipfileset dir="${dist.dir}/lib" prefix="lib/"/>
         </zip>

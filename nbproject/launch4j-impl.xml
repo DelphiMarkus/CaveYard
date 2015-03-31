@@ -17,6 +17,7 @@
         <delete file="launch4j-config.xml"/>
         <zip destfile="${dist.dir}/${application.title}-Windows.zip">
             <zipfileset file="${dist.dir}/${application.title}.exe" prefix=""/>
+            <zipfileset file="logging.properties" prefix=""/>
             <zipfileset dir="${dist.dir}/lib" prefix="lib/"/>
         </zip>
         <delete file="${dist.dir}/${application.title}.exe"/>

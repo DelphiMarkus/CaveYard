@@ -1,11 +1,15 @@
 package caveyard;
 
+import caveyard.assets.MapLoader;
 import caveyard.assets.ScriptLoader;
 import caveyard.map.Map;
 import caveyard.map.MapControl;
-import caveyard.assets.MapLoader;
 import caveyard.map.MapManager;
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.StatsAppState;
+import com.jme3.input.KeyInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.KeyTrigger;
 import com.jme3.light.DirectionalLight;
 import com.jme3.light.PointLight;
 import com.jme3.math.Vector3f;
@@ -17,8 +21,6 @@ import com.jme3.scene.control.LightControl;
 import com.jme3.shadow.PointLightShadowFilter;
 import com.jme3.shadow.PointLightShadowRenderer;
 
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -54,12 +56,24 @@ public class Main extends SimpleApplication
 	@Override
 	public void simpleInitApp()
 	{
-		Logger rootLogger = Logger.getLogger("caveyard");
-		rootLogger.setLevel(Level.FINER);
-		rootLogger.setUseParentHandlers(false);
-		ConsoleHandler consoleHandler = new ConsoleHandler();
-		consoleHandler.setLevel(Level.FINER);
-		rootLogger.addHandler(consoleHandler);
+		// change key to display stats from F5 to F3.
+		inputManager.deleteMapping(INPUT_MAPPING_HIDE_STATS);
+		inputManager.addMapping(INPUT_MAPPING_HIDE_STATS, new KeyTrigger(KeyInput.KEY_F3));
+		inputManager.addListener(new ActionListener() {
+			private boolean show = false;
+
+			@Override
+			public void onAction(String name, boolean isPressed, float tpf)
+			{
+				if (isPressed && stateManager.getState(StatsAppState.class) != null)
+				{
+					show = !show;
+					setDisplayStatView(show);
+				}
+			}
+		}, INPUT_MAPPING_HIDE_STATS);
+		// hide stats by default
+		this.setDisplayStatView(false);
 
 		initLoaders();
 		mapManager = MapManager.getInstance(assetManager);
