@@ -2,10 +2,14 @@ package caveyard.map;
 
 import caveyard.map.math.Rect;
 import com.jme3.asset.AssetManager;
+import com.jme3.bullet.collision.shapes.CollisionShape;
+import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.light.Light;
 import com.jme3.light.PointLight;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 
 import java.util.logging.Logger;
 
@@ -14,9 +18,17 @@ import java.util.logging.Logger;
  */
 public class Cell
 {
-	protected Logger logger = Logger.getLogger(Cell.class.getName());
+	public static final String TERRAIN_NODE = "terrain";
+	public static final String OBJECTS_NODE = "objects";
 
-	protected Node cellNode;
+	protected static Logger LOGGER = Logger.getLogger(Cell.class.getName());
+
+	protected Node node;
+	protected Node terrainNode;
+	protected Node objectsNode;
+
+	protected RigidBodyControl terrainControl;
+	protected boolean loaded;
 
 	protected String filename;
 	protected String nodeName;
@@ -31,12 +43,23 @@ public class Cell
 		this.area = area;
 		this.pos = pos;
 
-		this.cellNode = new Node();
+		this.loaded = false;
+		this.node = new Node();
 	}
 
-	public Node getCellNode()
+	public Node getNode()
 	{
-		return cellNode;
+		return node;
+	}
+
+	public Node getTerrainNode()
+	{
+		return terrainNode;
+	}
+
+	public Node getObjectsNode()
+	{
+		return objectsNode;
 	}
 
 	public Rect getArea()
@@ -44,9 +67,24 @@ public class Cell
 		return area;
 	}
 
+	public Vector3f getPos()
+	{
+		return pos;
+	}
+
 	public Vector3f getNodeOffset()
 	{
 		return nodeOffset;
+	}
+
+	public boolean isLoaded()
+	{
+		return loaded;
+	}
+
+	public RigidBodyControl getTerrainControl()
+	{
+		return terrainControl;
 	}
 
 	public void setNodeOffset(Vector3f nodeOffset)
@@ -56,7 +94,7 @@ public class Cell
 
 	public boolean loadCell(AssetManager assetManager)
 	{
-		if (cellNode.getChildren().size() != 0) return true;
+		if (isLoaded()) return true;
 
 		Node node = (Node) assetManager.loadModel(filename);
 		if (nodeName != null && nodeName.length() != 0 && !node.getName().equals(nodeName))
@@ -68,39 +106,59 @@ public class Cell
 			}
 			else
 			{
-				logger.warning("Unable to load Node \"" + nodeName + "\" from \"" + filename + "\"" +
+				LOGGER.warning("Unable to load Node \"" + nodeName + "\" from \"" + filename + "\"" +
 						"; using Model as a whole.");
 			}
 		}
 
-		Vector3f oldNodePos = node.getWorldTranslation();
+		this.node.detachAllChildren();
+		this.node.setLocalTranslation(pos);
+		this.node.attachChild(node);
 
-		cellNode.detachAllChildren();
-		cellNode.setLocalTranslation(pos);
-		cellNode.attachChild(node);
-		// remove offset
-		node.setLocalTranslation(nodeOffset.mult(-1));
-
-		Vector3f newNodePos = node.getWorldTranslation();
-		Vector3f translation = oldNodePos.subtract(newNodePos);
-
-		for (Light light: node.getLocalLightList())
+		for (Spatial child: node.getChildren())
 		{
-			if (light instanceof PointLight)
+			if (child.getName().equals(Cell.TERRAIN_NODE))
 			{
-				Vector3f newLightPos = ((PointLight) light).getPosition();
-				newLightPos = newLightPos.add(translation);
-
-				((PointLight) light).setPosition(newLightPos);
+				terrainNode = new Node();
+				terrainNode.setLocalTranslation(pos);
+				child.setLocalTranslation(nodeOffset.negate());
+				terrainNode.attachChild(child);
+			}
+			else if (child.getName().equals(Cell.OBJECTS_NODE))
+			{
+				objectsNode = new Node();
+				objectsNode.setLocalTranslation(pos);
+				child.setLocalTranslation(nodeOffset.negate());
+				objectsNode.attachChild(child);
 			}
 		}
+		if (objectsNode == null && terrainNode == null)
+		{
+			LOGGER.finer("Model \"" + filename + "\" does not have terrain or " +
+					"objects node. Displaying nothing.");
+		}
 
+		calculateTerrainShape();
 
+		loaded = true;
 		return true;
+	}
+
+	public void calculateTerrainShape()
+	{
+		if (terrainControl != null || terrainNode == null) return;
+
+		CollisionShape terrainShape = CollisionShapeFactory.createMeshShape(terrainNode);
+		terrainControl = new RigidBodyControl(terrainShape, 0);
+		terrainControl.setPhysicsLocation(pos);
 	}
 
 	public void unloadCell()
 	{
-		cellNode.detachAllChildren();
+		if (isLoaded())
+		{
+			node.detachAllChildren();
+			loaded = false;
+		}
 	}
 }

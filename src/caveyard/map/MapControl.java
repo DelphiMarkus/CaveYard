@@ -1,12 +1,19 @@
 package caveyard.map;
 
 import caveyard.map.math.Circle;
+import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.collision.shapes.CollisionShape;
+import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
+import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
+import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 
+import java.util.HashSet;
 import java.util.logging.Logger;
 
 /**
@@ -16,27 +23,30 @@ public class MapControl extends AbstractControl
 {
 	protected static Logger logger = Logger.getLogger(MapControl.class.getName());
 
+	protected Spatial player;
 	protected Map map;
 
 	protected Vector2f lastUpdatePos;
 	protected float renderRadius;
 	protected float reloadThreshold;
 
-	public MapControl(Map map, float renderRadius, float reloadThreshold)
+	public MapControl(Spatial player, float renderRadius, float reloadThreshold)
 	{
-		this.map = map;
+		this.player = player;
 		this.renderRadius = renderRadius;
 		this.reloadThreshold = reloadThreshold;
+
+		this.map = null;
 	}
 
-	public void setMap(Map map)
+	public void setPlayer(Spatial player)
 	{
-		this.map = map;
+		this.player = player;
 	}
 
-	public Map getMap()
+	public Spatial getPlayer()
 	{
-		return map;
+		return player;
 	}
 
 	public float getRenderRadius()
@@ -60,29 +70,56 @@ public class MapControl extends AbstractControl
 	}
 
 	@Override
+	public void setSpatial(Spatial spatial)
+	{
+		if (spatial instanceof MapNode)
+		{
+			super.setSpatial(spatial);
+			this.map = ((MapNode) spatial).getMap();
+			((MapNode) spatial).setMapControl(this);
+		}
+		else
+		{
+			throw new RuntimeException("MapControl can only handle MapNodes. Got \"" +
+					spatial.getClass().getName() + "\" instead.");
+		}
+	}
+
+	@Override
 	protected void controlUpdate(float tpf)
 	{
-		final Vector3f pos = spatial.getWorldTranslation();
+		final Vector3f pos = player.getWorldTranslation();
 
 		final Vector2f pos2D = new Vector2f(pos.x, pos.z);
 		// Only do an update if we moved since last update.
-		if (lastUpdatePos == null || pos2D.subtract(lastUpdatePos).length() >= renderRadius*reloadThreshold)
+		if (lastUpdatePos == null || pos2D.distance(lastUpdatePos) >= renderRadius*reloadThreshold)
 		{
 			logger.fine("Updating cells...");
 
-			map.visibleCells.detachAllChildren();
+			map.terrain.detachAllChildren();
+			map.objects.detachAllChildren();
+			map.visibleCells.clear();
 
-			//final Rect rect = new Rect(pos2D.x - renderRadius, pos2D.y - renderRadius,
-			//		pos2D.x + renderRadius, pos2D.y + renderRadius);
 			final Circle circle = new Circle(pos2D.x, pos2D.y, renderRadius);
 			for (Cell cell : map.find(circle))
 			{
-				cell.loadCell(map.assetManager);
-				map.visibleCells.attachChild(cell.getCellNode());
+				if (!cell.isLoaded())
+					cell.loadCell(map.assetManager);
+
+				map.visibleCells.add(cell);
+
+				// get terrain and objects nodes
+				if (cell.getTerrainNode() != null)
+					map.terrain.attachChild(cell.getTerrainNode());
+				if (cell.getObjectsNode() != null)
+					map.objects.attachChild(cell.getObjectsNode());
 			}
-			logger.fine("Update finished. Visible cells: " + map.visibleCells.getQuantity());
+			logger.fine("Update finished. Visible terrain nodes: " + map.visibleCells.size());
 
 			lastUpdatePos = pos2D;
+
+			// tell MapTerrainPhysicsControl to do an update
+			map.getMapNode().getMapPhysics().setNeedsUpdate(true);
 		}
 	}
 

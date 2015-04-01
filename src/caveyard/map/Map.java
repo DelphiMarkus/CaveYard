@@ -1,10 +1,12 @@
 package caveyard.map;
 
-import caveyard.xml.map.CellType;
-import caveyard.xml.map.MapType;
 import caveyard.map.math.Area;
 import caveyard.map.math.Rect;
+import caveyard.xml.map.CellType;
+import caveyard.xml.map.MapType;
 import com.jme3.asset.AssetManager;
+import com.jme3.bullet.collision.shapes.PlaneCollisionShape;
+import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 
@@ -24,8 +26,11 @@ public class Map
 	//protected CellTree cellTree;
 	protected ArrayList<Cell> cells;
 
-    protected Node attachedNodes;
-    protected Node visibleCells;
+	protected HashSet<Cell> visibleCells;
+
+	protected Node terrain;
+	protected Node objects;
+	protected MapNode mapNode;
     
     public Map(AssetManager assetManager)
     {
@@ -33,9 +38,15 @@ public class Map
 
 		//cellTree = new CellTree();
 		cells = new ArrayList<>();
+		visibleCells = new HashSet<>();
 
-        attachedNodes = new Node("attachedNodes");
-        visibleCells = new Node("visibleCells");
+		terrain = new Node("terrain");
+		objects = new Node("objects");
+
+		mapNode = new MapNode(this);
+
+		mapNode.attachChild(terrain);
+		mapNode.attachChild(objects);
     }
 
     protected void addCell(Cell cell)
@@ -90,16 +101,18 @@ public class Map
 		return map;
 	}
 
-
-	public void attachTo(Node node)
+	public Node getObjects()
 	{
-		node.attachChild(visibleCells);
-		attachedNodes.attachChild(node);
+		return objects;
 	}
 
-	public void detachFrom(Node node)
+	public Node getTerrain()
 	{
-		node.detachChild(visibleCells);
-		attachedNodes.detachChild(node);
+		return terrain;
+	}
+
+	public MapNode getMapNode()
+	{
+		return mapNode;
 	}
 }

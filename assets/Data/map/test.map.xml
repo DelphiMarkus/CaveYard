@@ -7,20 +7,19 @@
 
     <cells>
         <cell x="0" z="0" size_x="40" size_z="40">
-            <file>Models/landscape_test2/landscape_test2_split.j3o</file>
+            <file>Models/landscape_test2/landscape_test2_copy.j3o</file>
             <offset x="-20" z="-20"/>
         </cell>
         <cell x="0" z="-40" size_x="40" size_z="40">
-            <file>Models/landscape_test2/landscape_test2_split.j3o</file>
+            <file>Models/landscape_test2/landscape_test2_copy.j3o</file>
             <offset x="-20" z="-20"/>
         </cell>
         <cell x="-40" z="0" size_x="40" size_z="40">
-            <file>Models/landscape_test2/landscape_test2_split.j3o</file>
-            <node>Tests</node>
+            <file>Models/landscape_test2/landscape_test2_copy.j3o</file>
             <offset x="-20" z="-20"/>
         </cell>
         <cell x="-40" z="-40" size_x="40" size_z="40">
-            <file>Models/landscape_test2/landscape_test2_split.j3o</file>
+            <file>Models/landscape_test2/landscape_test2_copy.j3o</file>
             <offset x="-20" z="-20"/>
         </cell>
         <cell x="1" z="3" size_x="2" size_z="1">
