@@ -146,8 +146,8 @@ public class Main extends SimpleApplication implements ActionListener
 		MapNode mapNode = currentMap.getMapNode();
 
 		// create a map control to update visible cells
-		MapControl mapControl = new MapControl(player, 20, 0.15f);
-		mapNode.addControl(mapControl);
+		MapLODControl mapLODControl = new MapLODControl(player, 20, 5);
+		mapNode.addControl(mapLODControl);
 
 		MapTerrainPhysicsControl mapPhysics = new MapTerrainPhysicsControl(bulletAppState.getPhysicsSpace());
 		mapNode.addControl(mapPhysics);
@@ -171,7 +171,7 @@ public class Main extends SimpleApplication implements ActionListener
 		PointLightShadowRenderer plsr = new PointLightShadowRenderer(assetManager, SHADOW_MAP_SIZE);
 		plsr.setLight(playerLight);
 		viewPort.addProcessor(plsr);
-//
+
 		PointLightShadowFilter plsf = new PointLightShadowFilter(assetManager, SHADOW_MAP_SIZE);
 		plsf.setLight(playerLight);
 		plsf.setEnabled(true);
