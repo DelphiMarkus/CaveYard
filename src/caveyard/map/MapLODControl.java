@@ -71,8 +71,6 @@ public class MapLODControl extends AbstractControl
 	 * Registeres the spatial which position is used to determine the
 	 * cells to load.
 	 * @param player New player spatial.
-	 *
-	 * @see #controlUpdate(float)
 	 */
 	public void setPlayer(Spatial player)
 	{
@@ -83,8 +81,6 @@ public class MapLODControl extends AbstractControl
 	 * Returns the spatial currently used to calculate the cells to
 	 * show around it.
 	 * @return The target spatial.
-	 *
-	 * @see #controlUpdate(float)
 	 */
 	public Spatial getPlayer()
 	{

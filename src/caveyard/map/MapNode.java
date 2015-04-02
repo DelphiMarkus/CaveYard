@@ -39,13 +39,34 @@ public class MapNode extends Node
 		this(map, null, null);
 	}
 
+	/**
+	 * Creates a new Node. mapLodControl and mapPhysics are automatically added
+	 * to this node if not null. If a {@link MapLODControl} is attached to this
+	 * node, this node's attribute mapLODControl will be set (and overwritten)
+	 * automatically. The same happens when a {@link MapTerrainPhysicsControl}
+	 * is attached.
+	 *
+	 * @param map Map which owns this map node.
+	 * @param mapLODControl LOD control to use.
+	 * @param mapPhysics terrain physics to use.
+	 */
 	public MapNode(Map map, MapLODControl mapLODControl, MapTerrainPhysicsControl mapPhysics)
 	{
 		super(MAP_NODE_NAME);
 
 		this.map = map;
+
 		this.mapLODControl = mapLODControl;
 		this.mapPhysics = mapPhysics;
+
+		if (mapLODControl != null)
+		{
+			this.addControl(mapLODControl);
+		}
+		if (mapPhysics != null)
+		{
+			this.addControl(mapPhysics);
+		}
 
 		this.map.mapNode = this;
 	}
