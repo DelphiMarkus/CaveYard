@@ -22,7 +22,7 @@
             <file>Models/landscape_test2/landscape_test2_copy.j3o</file>
             <offset x="-20" z="-20"/>
         </cell>
-        <cell x="1" z="3" size_x="2" size_z="1">
+        <cell x="1" y="2" z="3" size_x="2" size_z="1">
             <file>Models/misc/Tür.j3o</file>
             <offset x="-3"/>
         </cell>

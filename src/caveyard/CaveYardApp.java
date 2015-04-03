@@ -138,6 +138,9 @@ public class CaveYardApp extends SimpleApplication
 		MapTerrainPhysicsControl mapPhysics = new MapTerrainPhysicsControl(bulletAppState.getPhysicsSpace());
 		mapNode.addControl(mapPhysics);
 
+		MapObjectsPhysicsControl objectsPhysics = new MapObjectsPhysicsControl(playerNode, 10, 0.5f, bulletAppState.getPhysicsSpace());
+		mapNode.addControl(objectsPhysics);
+
 		rootNode.attachChild(mapNode);
 
 		// add light
