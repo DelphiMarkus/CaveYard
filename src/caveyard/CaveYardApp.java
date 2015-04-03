@@ -3,11 +3,11 @@ package caveyard;
 import caveyard.assets.MapLoader;
 import caveyard.assets.ScriptLoader;
 import caveyard.map.*;
+import caveyard.states.PlayerControlAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.BetterCharacterControl;
-import com.jme3.input.ChaseCamera;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
@@ -20,7 +20,6 @@ import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.control.LightControl;
 import com.jme3.scene.shape.Cylinder;
@@ -34,11 +33,12 @@ import java.util.logging.Logger;
  *
  * @author Maximilian Timmerkamp
  */
-public class Main extends SimpleApplication implements ActionListener
+public class CaveYardApp extends SimpleApplication
 {
-	protected static Logger LOGGER = Logger.getLogger(Main.class.getName());
+	protected static Logger LOGGER = Logger.getLogger(CaveYardApp.class.getName());
 
 	protected BulletAppState bulletAppState;
+	protected PlayerControlAppState playerAppState;
 
 	protected MapManager mapManager;
 	protected Map currentMap;
@@ -46,23 +46,13 @@ public class Main extends SimpleApplication implements ActionListener
 	protected DirectionalLight sun;
 	protected PointLight playerLight;
 
-	protected Node player;
+	protected Node playerNode;
 	protected BetterCharacterControl playerControl;
-
-	//protected CameraNode camNode;
-
-	private Vector3f walkDirection = new Vector3f(0, 0, 0);
-	private boolean left;
-	private boolean right;
-	private boolean forwards;
-	private boolean backwards;
 
 	public static void main(String[] args)
 	{
-		Main app = new Main();
+		CaveYardApp app = new CaveYardApp();
 		app.start();
-
-		//ConsoleDialogListenerTest.main(args);
 	}
 
 	private void initLoaders()
@@ -98,19 +88,6 @@ public class Main extends SimpleApplication implements ActionListener
 
 		mapManager = MapManager.getInstance(assetManager);
 		initTestMap();
-
-		setupKeys();
-
-
-		flyCam.setEnabled(false);
-
-		ChaseCamera chaseCam = new ChaseCamera(cam, player, inputManager);
-		chaseCam.setInvertVerticalAxis(true);
-		chaseCam.setSmoothMotion(true);
-		chaseCam.setDragToRotate(false);
-
-		chaseCam.setMinDistance(2.0f);
-		chaseCam.setDownRotateOnCloseViewOnly(false);
 	}
 
 	private void initTestMap()
@@ -120,22 +97,31 @@ public class Main extends SimpleApplication implements ActionListener
 		stateManager.attach(bulletAppState);
 		//bulletAppState.setDebugEnabled(true);
 
-		// create player node
-		Node playerNode = new Node("PlayerNode");
-		player = new Node("Player");
-		player.setLocalTranslation(0, 2, 0);
-		rootNode.attachChild(playerNode);
-		playerNode.attachChild(player);
+		// create cameraTarget node
+		Node cameraTarget = new Node("cameraTarget");
+		cameraTarget.setLocalTranslation(0, 2, 0);
+		playerAppState = new PlayerControlAppState(cameraTarget);
+		playerNode = playerAppState.getPlayerNode();
+		stateManager.attach(playerAppState);
+
+		playerControl = new BetterCharacterControl(0.25f, 2, 75);
+		playerControl.setGravity(new Vector3f(0, -9.81f, 0));
+		playerControl.setJumpForce(new Vector3f(0, 335, 0));
+		bulletAppState.getPhysicsSpace().add(playerControl);
+		playerAppState.setPlayerControl(playerControl);
+		playerControl.warp(new Vector3f(0, 10, 0));
+
 
 		// create cylinder which represents the player
 		Geometry cylinder = new Geometry("playerBox");
-		Mesh boxMesh = new Cylinder(10, 10, 0.5f, 3, true);
+		Cylinder mesh = new Cylinder(10, 10, 0.25f, 2, true);
 		Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		material.setColor("Color", ColorRGBA.Blue);
+		material.getAdditionalRenderState().setWireframe(true);
 		cylinder.setMaterial(material);
-		cylinder.setMesh(boxMesh);
+		cylinder.setMesh(mesh);
 		cylinder.rotate(FastMath.HALF_PI, 0, 0);
-		cylinder.setLocalTranslation(0, 1.55f, 0);
+		cylinder.setLocalTranslation(0, mesh.getHeight()/2, 0);
 		playerNode.attachChild(cylinder);
 
 		// load map
@@ -146,7 +132,7 @@ public class Main extends SimpleApplication implements ActionListener
 		MapNode mapNode = currentMap.getMapNode();
 
 		// create a map control to update visible cells
-		MapLODControl mapLODControl = new MapLODControl(player, 20, 5);
+		MapLODControl mapLODControl = new MapLODControl(playerNode, 20, 5);
 		mapNode.addControl(mapLODControl);
 
 		MapTerrainPhysicsControl mapPhysics = new MapTerrainPhysicsControl(bulletAppState.getPhysicsSpace());
@@ -161,10 +147,10 @@ public class Main extends SimpleApplication implements ActionListener
 
 		// create a node which position is copied to the light's position
 		Node lightNode = new Node();
-		lightNode.setLocalTranslation(0, 0, 1);
+		lightNode.setLocalTranslation(0, 2, 1);
 		LightControl playerLightControl = new LightControl(playerLight, LightControl.ControlDirection.SpatialToLight);
 		lightNode.addControl(playerLightControl);
-		player.attachChild(lightNode);
+		playerNode.attachChild(lightNode);
 
 		/* Drop shadows */
 		final int SHADOW_MAP_SIZE = 512;
@@ -178,87 +164,15 @@ public class Main extends SimpleApplication implements ActionListener
 		FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
 		fpp.addFilter(plsf);
 		viewPort.addProcessor(fpp);
-
-
-		playerControl = new BetterCharacterControl(0.5f, 3, 10);
-		playerControl.setGravity(new Vector3f(0, -9.81f, 0));
-		playerControl.setJumpForce(new Vector3f(0, 60, 0));
-		playerNode.addControl(playerControl);
-		playerControl.warp(new Vector3f(0, 10, 0));
-
-		bulletAppState.getPhysicsSpace().add(playerControl);
-	}
-
-	private void setupKeys() {
-		inputManager.addMapping("Left", new KeyTrigger(KeyInput.KEY_A));
-		inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_D));
-		inputManager.addMapping("Up", new KeyTrigger(KeyInput.KEY_W));
-		inputManager.addMapping("Down", new KeyTrigger(KeyInput.KEY_S));
-		inputManager.addMapping("Jump", new KeyTrigger(KeyInput.KEY_SPACE));
-		inputManager.addListener(this, "Left");
-		inputManager.addListener(this, "Right");
-		inputManager.addListener(this, "Up");
-		inputManager.addListener(this, "Down");
-		inputManager.addListener(this, "Jump");
 	}
 
 	@Override
 	public void simpleUpdate(float tpf)
 	{
-		inputManager.setCursorVisible(false);
-
-		Vector3f modelForwardDir = cam.getDirection();
-		Vector3f modelLeftDir = cam.getLeft();
-
-		walkDirection.set(0, 0, 0);
-		if (left) {
-			walkDirection.addLocal(modelLeftDir);
-		} else if (right) {
-			walkDirection.addLocal(modelLeftDir.negate());
-		}
-		if (forwards) {
-			walkDirection.addLocal(modelForwardDir);
-		} else if (backwards) {
-			walkDirection.addLocal(modelForwardDir.negate());
-		}
-		if (walkDirection.lengthSquared() != 0)
-		{
-			walkDirection.setY(0);
-			walkDirection.divideLocal(walkDirection.length()).multLocal(3);
-
-			//playerControl.setViewDirection(cam.getDirection());
-			playerControl.setViewDirection(walkDirection);
-		}
-		playerControl.setWalkDirection(walkDirection);
 	}
 
 	@Override
 	public void simpleRender(RenderManager rm)
 	{
-	}
-
-	@Override
-	public void onAction(String name, boolean isPressed, float tpf)
-	{
-		if (name.equals("Left"))
-		{
-			left = isPressed;
-		}
-		else if (name.equals("Right"))
-		{
-			right = isPressed;
-		}
-		else if (name.equals("Up"))
-		{
-			forwards = isPressed;
-		}
-		else if (name.equals("Down"))
-		{
-			backwards = isPressed;
-		}
-		else if (name.equals("Jump"))
-		{
-			playerControl.jump();
-		}
 	}
 }
