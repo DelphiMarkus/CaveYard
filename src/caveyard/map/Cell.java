@@ -90,9 +90,11 @@ public class Cell
 		this.nodeOffset = nodeOffset;
 	}
 
-	public boolean loadCell(AssetManager assetManager)
+	public boolean loadCell(AssetManager assetManager, ObjectsTree objectsTree)
 	{
 		if (isLoaded()) return true;
+
+		LOGGER.info("Loading cell " + filename + ":" + nodeName);
 
 		Node node = (Node) assetManager.loadModel(filename);
 		if (nodeName != null && nodeName.length() != 0 && !node.getName().equals(nodeName))
@@ -109,9 +111,9 @@ public class Cell
 			}
 		}
 
-		this.node.detachAllChildren();
-		this.node.setLocalTranslation(pos);
-		this.node.attachChild(node);
+//		this.node.detachAllChildren();
+//		this.node.setLocalTranslation(pos);
+//		this.node.attachChild(node);
 
 		for (Spatial child: node.getChildren())
 		{
@@ -124,12 +126,22 @@ public class Cell
 			}
 			else if (child.getName().equals(Cell.OBJECTS_NODE))
 			{
-				objectsNode = new Node();
-				objectsNode.setLocalTranslation(pos);
-				child.setLocalTranslation(nodeOffset.negate());
-				objectsNode.attachChild(child);
+				for (Spatial object : ((Node) child).getChildren())
+				{
+					object.removeFromParent();
+
+					Vector3f objectPos = object.getLocalTranslation();
+					objectPos.addLocal(pos);
+					objectPos.subtractLocal(nodeOffset);
+					object.setLocalTranslation(objectPos);
+
+					LOGGER.fine("position of " + object + "[" + object.hashCode() + "] = " + object.getWorldTranslation());
+
+					objectsTree.insert(object);
+				}
 			}
 		}
+
 		if (objectsNode == null && terrainNode == null)
 		{
 			LOGGER.finer("Model \"" + filename + "\" does not have terrain or " +

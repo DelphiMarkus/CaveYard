@@ -5,8 +5,7 @@ import caveyard.map.math.Rect;
 import caveyard.xml.map.CellType;
 import caveyard.xml.map.MapType;
 import com.jme3.asset.AssetManager;
-import com.jme3.bullet.collision.shapes.PlaneCollisionShape;
-import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 
@@ -30,7 +29,10 @@ public class Map
 
 	protected Node terrain;
 	protected Node objects;
+	protected Node physicsObjects;
 	protected MapNode mapNode;
+
+	protected ObjectsTree objectsTree;
     
     public Map(AssetManager assetManager)
     {
@@ -42,11 +44,16 @@ public class Map
 
 		terrain = new Node("terrain");
 		objects = new Node("objects");
+		physicsObjects = new Node("physicsObjects");
 
 		mapNode = new MapNode(this);
 
 		mapNode.attachChild(terrain);
 		mapNode.attachChild(objects);
+		mapNode.attachChild(physicsObjects);
+
+		// TODO: get proper coordinates!
+		objectsTree = new ObjectsTree(new Vector2f(-100, -100), new Vector2f(100, 100), new Vector2f(10f, 10f));
     }
 
     protected void addCell(Cell cell)

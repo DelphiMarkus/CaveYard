@@ -1,17 +1,18 @@
 package caveyard.map;
 
+import caveyard.util.VecUtil;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
-import com.jme3.math.Vector3f;
+import com.jme3.math.Vector2f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 /**
@@ -29,7 +30,9 @@ public class MapObjectsPhysicsControl extends AbstractControl
 	protected PhysicsSpace physicsSpace;
 	protected float physicsRadius;
 	protected float reloadDistance;
-	protected Vector3f lastUpdatePos;
+	protected Vector2f lastUpdatePos;
+
+	protected ObjectsCell currentObjects;
 
 	public MapObjectsPhysicsControl(Spatial target, float physicsRadius, float reloadDistance,
 									PhysicsSpace physicsSpace)
@@ -38,6 +41,8 @@ public class MapObjectsPhysicsControl extends AbstractControl
 		this.physicsRadius = physicsRadius;
 		this.reloadDistance = reloadDistance;
 		this.physicsSpace = physicsSpace;
+
+		lastUpdatePos = null;
 	}
 
 	public float getPhysicsRadius()
@@ -79,38 +84,66 @@ public class MapObjectsPhysicsControl extends AbstractControl
 	@Override
 	protected void controlUpdate(float tpf)
 	{
-		final Vector3f pos = target.getWorldTranslation().clone();
-		pos.setY(0);
+		final Vector2f pos = VecUtil.toXZVector(target.getWorldTranslation());
 
 		if (lastUpdatePos == null || pos.distance(lastUpdatePos) >= reloadDistance)
 		{
-			for (Spatial cellObjects: map.objects.getChildren())
+			if (currentObjects != null)
 			{
-				List<Spatial> cells = ((Node) cellObjects).getChildren();
-				Node objects = (Node) cells.get(0);
-				if (cells.size() > 1) LOGGER.warning("More than one child. All other children are not processed!");
+				map.objectsTree.insertAndEmpty(currentObjects);
+				if (currentObjects.getObjects().size() > 0)
+					LOGGER.warning("Objects left: " + currentObjects.getObjects().size());
+			}
+			ObjectsCell oldObjects = currentObjects;
 
-				for (Spatial object : objects.getChildren())
+			Vector2f p1 = pos.add(Vector2f.UNIT_XY.mult(-physicsRadius));
+			Vector2f p2 = pos.add(Vector2f.UNIT_XY.mult(physicsRadius));
+			currentObjects = map.objectsTree.findObjectsAndRemoveToCell(p1, p2);
+
+			if (oldObjects != null)
+			{
+				for (Spatial object: oldObjects.getObjects())
 				{
-					if (pos.distance(object.getWorldTranslation().clone().setY(0)) <= physicsRadius)
+					currentObjects.getObjects().add(object);
+				}
+			}
+
+			LOGGER.fine("number of physics objects: " + currentObjects.getObjects().size());
+
+			HashSet<Spatial> remainingObjects = new HashSet<>();
+			for (Iterator<Spatial> it = map.physicsObjects.getChildren().iterator(); it.hasNext(); )
+			{
+				Spatial object = it.next();
+
+				if (!currentObjects.getObjects().contains(object))
+				{
+					RigidBodyControl control = object.getControl(RigidBodyControl.class);
+					if (control != null)
 					{
-						RigidBodyControl control = object.getControl(RigidBodyControl.class);
-						if (control == null)
-						{
-							CollisionShape shape = CollisionShapeFactory.createDynamicMeshShape(object);
-							control = new RigidBodyControl(shape, 10);
-							object.addControl(control);
-						}
-						physicsSpace.add(control);
+						physicsSpace.remove(control);
 					}
-					else
+					it.remove();
+				}
+				else
+				{
+					remainingObjects.add(object);
+				}
+			}
+
+			for (Spatial object: currentObjects.getObjects())
+			{
+				if (!remainingObjects.contains(object))
+				{
+					RigidBodyControl control = object.getControl(RigidBodyControl.class);
+					if (control == null)
 					{
-						RigidBodyControl control = object.getControl(RigidBodyControl.class);
-						if (control != null)
-						{
-							physicsSpace.remove(control);
-						}
+						CollisionShape shape = CollisionShapeFactory.createDynamicMeshShape(object);
+						control = new RigidBodyControl(shape, 10);
+						object.addControl(control);
 					}
+					physicsSpace.add(control);
+
+					map.physicsObjects.attachChild(object);
 				}
 			}
 

@@ -174,16 +174,24 @@ public class MapLODControl extends AbstractControl
 			for (Cell cell : map.find(circle))
 			{
 				if (!cell.isLoaded())
-					cell.loadCell(map.assetManager);
+					cell.loadCell(map.assetManager, map.objectsTree);
 
 				map.visibleCells.add(cell);
 
-				// get terrain and objects nodes
+				// get terrain node
 				if (cell.getTerrainNode() != null)
+				{
 					map.terrain.attachChild(cell.getTerrainNode());
-				if (cell.getObjectsNode() != null)
-					map.objects.attachChild(cell.getObjectsNode());
+				}
 			}
+
+			Vector2f p1 = pos2D.add(Vector2f.UNIT_XY.mult(-renderRadius));
+			Vector2f p2 = pos2D.add(Vector2f.UNIT_XY.mult(renderRadius));
+			for (Spatial object: map.objectsTree.findObjects(p1, p2))
+			{
+				map.objects.attachChild(object);
+			}
+
 			LOGGER.fine("Updated cells. Visible cells: " + map.visibleCells.size());
 
 			lastUpdatePos = pos2D;

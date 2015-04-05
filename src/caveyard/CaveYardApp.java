@@ -145,12 +145,12 @@ public class CaveYardApp extends SimpleApplication
 
 		// add light
 		playerLight = new PointLight();
-		playerLight.setRadius(20);
+		playerLight.setRadius(100);
 		rootNode.addLight(playerLight);
 
 		// create a node which position is copied to the light's position
 		Node lightNode = new Node();
-		lightNode.setLocalTranslation(0, 2, 1);
+		lightNode.setLocalTranslation(0, 2, 0);
 		LightControl playerLightControl = new LightControl(playerLight, LightControl.ControlDirection.SpatialToLight);
 		lightNode.addControl(playerLightControl);
 		playerNode.attachChild(lightNode);
@@ -159,14 +159,14 @@ public class CaveYardApp extends SimpleApplication
 		final int SHADOW_MAP_SIZE = 512;
 		PointLightShadowRenderer plsr = new PointLightShadowRenderer(assetManager, SHADOW_MAP_SIZE);
 		plsr.setLight(playerLight);
-		viewPort.addProcessor(plsr);
+		//viewPort.addProcessor(plsr);
 
 		PointLightShadowFilter plsf = new PointLightShadowFilter(assetManager, SHADOW_MAP_SIZE);
 		plsf.setLight(playerLight);
 		plsf.setEnabled(true);
 		FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
 		fpp.addFilter(plsf);
-		viewPort.addProcessor(fpp);
+		//viewPort.addProcessor(fpp);
 	}
 
 	@Override
