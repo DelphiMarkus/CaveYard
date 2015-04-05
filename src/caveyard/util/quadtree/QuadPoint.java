@@ -1,4 +1,4 @@
-package caveyard.util;
+package caveyard.util.quadtree;
 
 import com.jme3.math.Vector2f;
 
@@ -47,41 +47,47 @@ public class QuadPoint<Key extends Comparable<Key>>
 	public CompareResult relativePosTo(QuadPoint<Key> other)
 	{
 		if (eq(this.x, other.x) && eq(this.y, other.y)) return CompareResult.EQUAL;
-		else if (less(this.x, other.x) && less(this.y, other.y)) return CompareResult.NORTH_WEST;
-		else if (less(this.x, other.x) && !less(this.y, other.y)) return CompareResult.SOUTH_WEST;
-		else if (!less(this.x, other.x) && less(this.y, other.y)) return CompareResult.NORTH_EAST;
-		else if (!less(this.x, other.x) && !less(this.y, other.y)) return CompareResult.SOUTH_EAST;
+		else if (lessEq(this.x, other.x) && lessEq(this.y, other.y)) return CompareResult.NORTH_WEST;
+		else if (lessEq(this.x, other.x) && !lessEq(this.y, other.y)) return CompareResult.SOUTH_WEST;
+		else if (!lessEq(this.x, other.x) && lessEq(this.y, other.y)) return CompareResult.NORTH_EAST;
+		else if (!lessEq(this.x, other.x) && !lessEq(this.y, other.y)) return CompareResult.SOUTH_EAST;
 		return null;
 	}
 
 	public boolean isEastOf(QuadPoint<Key> other)
 	{
-		return !less(this.x, other.x);
+		return !lessEq(this.x, other.x);
 	}
 
 	public boolean isWestOf(QuadPoint<Key> other)
 	{
-		return less(this.x, other.x) || eq(this.x, other.x);
+		return lessEq(this.x, other.x) || eq(this.x, other.x);
 	}
 
 	public boolean isNorthOf(QuadPoint<Key> other)
 	{
-		return less(this.y, other.y);
+		return lessEq(this.y, other.y);
 	}
 
 	public boolean isSouthOf(QuadPoint<Key> other)
 	{
-		return !less(this.y, other.y);
+		return !lessEq(this.y, other.y);
 	}
 
-	static <Key extends Comparable<Key>>  boolean less(Key k1, Key k2)
+	static <Key extends Comparable<Key>>  boolean lessEq(Key k1, Key k2)
 	{
-		return k1.compareTo(k2) < 0;
+		return k1.compareTo(k2) <= 0;
 	}
 
 	static <Key extends Comparable<Key>> boolean eq(Key k1, Key k2)
 	{
 		return k1.compareTo(k2) == 0;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "(" + x + ", " + y + ")";
 	}
 
 	public static QuadPoint<Float> fromVector2f(Vector2f vector2f)

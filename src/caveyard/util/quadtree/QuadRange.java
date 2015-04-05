@@ -1,4 +1,4 @@
-package caveyard.util;
+package caveyard.util.quadtree;
 
 /**
  * @author Maximilian Timmerkamp
@@ -45,7 +45,24 @@ public class QuadRange<Key extends Comparable<Key>>
 	{
 		return p.relativePosTo(upLeft) == QuadPoint.CompareResult.SOUTH_EAST &&
 				p.relativePosTo(bottomRight) == QuadPoint.CompareResult.NORTH_WEST ||
-				p.relativePosTo(upLeft) == QuadPoint.CompareResult.EQUAL ||
 				p.relativePosTo(bottomRight) == QuadPoint.CompareResult.EQUAL;
+		//p.relativePosTo(upLeft) == QuadPoint.CompareResult.EQUAL ||
+	}
+
+	public boolean intersectsWith(QuadRange<Key> range)
+	{
+		return range.contains(upLeft) || range.contains(bottomRight) ||
+				this.contains(range.upLeft) || this.contains(range.bottomRight);
+	}
+
+	public boolean hasArea()
+	{
+		return bottomRight.x.compareTo(upLeft.x) != 0 && bottomRight.y.compareTo(upLeft.y) != 0;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "[" + upLeft.toString() + "; " + bottomRight.toString() + "]";
 	}
 }
