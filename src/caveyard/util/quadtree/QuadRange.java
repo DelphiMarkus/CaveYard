@@ -5,7 +5,8 @@ package caveyard.util.quadtree;
  */
 public class QuadRange<Key extends Comparable<Key>>
 {
-	protected QuadPoint<Key> upLeft, bottomRight;
+	protected final QuadPoint<Key> upLeft, bottomRight;
+	protected final QuadPoint<Key> bottomLeft;
 
 	public QuadRange(QuadPoint<Key> p1, QuadPoint<Key> p2)
 	{
@@ -28,6 +29,17 @@ public class QuadRange<Key extends Comparable<Key>>
 				this.upLeft = new QuadPoint<>(p1.getX(), p2.getY());
 				this.bottomRight = new QuadPoint<>(p2.getX(), p1.getY());
 				break;
+			default:
+				this.upLeft = null;
+				this.bottomRight = null;
+		}
+		if (upLeft != null && bottomRight != null)
+		{
+			bottomLeft = new QuadPoint<>(upLeft.x, bottomRight.y);
+		}
+		else
+		{
+			bottomLeft = null;
 		}
 	}
 
@@ -45,24 +57,20 @@ public class QuadRange<Key extends Comparable<Key>>
 	{
 		return p.relativePosTo(upLeft) == QuadPoint.CompareResult.SOUTH_EAST &&
 				p.relativePosTo(bottomRight) == QuadPoint.CompareResult.NORTH_WEST ||
+				p.relativePosTo(upLeft) == QuadPoint.CompareResult.EQUAL ||
 				p.relativePosTo(bottomRight) == QuadPoint.CompareResult.EQUAL;
-		//p.relativePosTo(upLeft) == QuadPoint.CompareResult.EQUAL ||
 	}
 
 	public boolean intersectsWith(QuadRange<Key> range)
 	{
-		return range.contains(upLeft) || range.contains(bottomRight) ||
-				this.contains(range.upLeft) || this.contains(range.bottomRight);
-	}
-
-	public boolean hasArea()
-	{
-		return bottomRight.x.compareTo(upLeft.x) != 0 && bottomRight.y.compareTo(upLeft.y) != 0;
+		return range.contains(this.upLeft) || range.contains(this.bottomRight) ||
+				this.contains(range.upLeft) || this.contains(range.bottomRight) ||
+				range.contains(this.bottomLeft) || this.contains(range.bottomLeft);
 	}
 
 	@Override
 	public String toString()
 	{
-		return "[" + upLeft.toString() + "; " + bottomRight.toString() + "]";
+		return "([" + upLeft.x + "; " + bottomRight.x + "], [" + bottomRight.y + "; " + upLeft.y + "])";
 	}
 }

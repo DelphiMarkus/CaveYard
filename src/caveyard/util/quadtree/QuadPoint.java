@@ -12,7 +12,7 @@ public class QuadPoint<Key extends Comparable<Key>>
 		EQUAL, NORTH_WEST, NORTH_EAST, SOUTH_EAST, SOUTH_WEST
 	}
 
-	protected Key x, y;
+	protected final Key x, y;
 
 	public QuadPoint(Key[] point)
 	{
@@ -47,10 +47,10 @@ public class QuadPoint<Key extends Comparable<Key>>
 	public CompareResult relativePosTo(QuadPoint<Key> other)
 	{
 		if (eq(this.x, other.x) && eq(this.y, other.y)) return CompareResult.EQUAL;
-		else if (lessEq(this.x, other.x) && lessEq(this.y, other.y)) return CompareResult.NORTH_WEST;
-		else if (lessEq(this.x, other.x) && !lessEq(this.y, other.y)) return CompareResult.SOUTH_WEST;
-		else if (!lessEq(this.x, other.x) && lessEq(this.y, other.y)) return CompareResult.NORTH_EAST;
-		else if (!lessEq(this.x, other.x) && !lessEq(this.y, other.y)) return CompareResult.SOUTH_EAST;
+		else if (lessEq(this.x, other.x) && !less(this.y, other.y)) return CompareResult.NORTH_WEST;
+		else if (lessEq(this.x, other.x) && lessEq(this.y, other.y)) return CompareResult.SOUTH_WEST;
+		else if (!less(this.x, other.x) && !less(this.y, other.y)) return CompareResult.NORTH_EAST;
+		else if (!less(this.x, other.x) && lessEq(this.y, other.y)) return CompareResult.SOUTH_EAST;
 		return null;
 	}
 
@@ -61,7 +61,7 @@ public class QuadPoint<Key extends Comparable<Key>>
 
 	public boolean isWestOf(QuadPoint<Key> other)
 	{
-		return lessEq(this.x, other.x) || eq(this.x, other.x);
+		return lessEq(this.x, other.x);
 	}
 
 	public boolean isNorthOf(QuadPoint<Key> other)
@@ -77,6 +77,11 @@ public class QuadPoint<Key extends Comparable<Key>>
 	static <Key extends Comparable<Key>>  boolean lessEq(Key k1, Key k2)
 	{
 		return k1.compareTo(k2) <= 0;
+	}
+
+	static <Key extends Comparable<Key>>  boolean less(Key k1, Key k2)
+	{
+		return k1.compareTo(k2) < 0;
 	}
 
 	static <Key extends Comparable<Key>> boolean eq(Key k1, Key k2)

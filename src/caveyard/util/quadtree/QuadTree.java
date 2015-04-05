@@ -5,12 +5,15 @@ import caveyard.util.Mergeable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * @author Maximilian Timmerkamp
  */
 public class QuadTree<Key extends Comparable<Key>, Value>
 {
+	protected static final Logger LOGGER = Logger.getLogger(QuadTree.class.getName());
+
 	public abstract class Node
 	{
 		protected QuadPoint<Key> point; // x- and y-coordinates
@@ -83,69 +86,13 @@ public class QuadTree<Key extends Comparable<Key>, Value>
 		@Override
 		public List<Value> find2D(QuadRange<Key> range, List<Value> results)
 		{
-			boolean searchNW = false;
-			boolean searchNE = false;
-			boolean searchSE = false;
-			boolean searchSW = false;
-
-			if (range.contains(point))
+			if (range.contains(point) || range.intersectsWith(this.range))
 			{
-				searchNW = searchNE = searchSE = searchSW = true;
-			}
-			else
-			{
-				switch (range.getUpLeft().relativePosTo(point))
-				{
-					case EQUAL:
-					case NORTH_WEST:
-						searchNW = true;
-						searchNE = true;
-						searchSW = true;
-						break;
-					case NORTH_EAST:
-						searchNE = true;
-						searchSW = true;
-						break;
-					case SOUTH_WEST:
-						searchSE = true;
-						searchSW = true;
-						break;
-					case SOUTH_EAST:
-						searchSE = true;
-						break;
-				}
-
-				switch (range.getBottomRight().relativePosTo(point))
-				{
-					case EQUAL:
-					case NORTH_WEST:
-						searchNE &= false;
-						searchSE &= false;
-						searchSW &= false;
-						break;
-					case NORTH_EAST:
-						searchSE &= false;
-						searchSW &= false;
-						break;
-					case SOUTH_WEST:
-						searchNE &= false;
-						searchSE &= false;
-						break;
-					case SOUTH_EAST:
-						searchNW &= false;
-						break;
-				}
-			}
-
-			if (searchNW)
 				this.nw.find2D(range, results);
-			if (searchNE)
 				this.ne.find2D(range, results);
-			if (searchSE)
 				this.se.find2D(range, results);
-			if (searchSW)
 				this.sw.find2D(range, results);
-
+			}
 			return results;
 		}
 	}
