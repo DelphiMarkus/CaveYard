@@ -80,6 +80,16 @@ public class MapNode extends Node
 		return map;
 	}
 
+	public Node getTerrainNode()
+	{
+		return map.getTerrain();
+	}
+
+	public Node getObjectsNode()
+	{
+		return map.getObjects();
+	}
+
 	/**
 	 * Get the LOD control.
 	 * @return The map's MapLODControl.

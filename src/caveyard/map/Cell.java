@@ -135,8 +135,6 @@ public class Cell
 					objectPos.subtractLocal(nodeOffset);
 					object.setLocalTranslation(objectPos);
 
-					LOGGER.fine("position of " + object + "[" + object.hashCode() + "] = " + object.getWorldTranslation());
-
 					objectsTree.insert(object);
 				}
 			}

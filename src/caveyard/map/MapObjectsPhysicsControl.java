@@ -108,7 +108,7 @@ public class MapObjectsPhysicsControl extends AbstractControl
 				}
 			}
 
-			LOGGER.fine("number of physics objects: " + currentObjects.getObjects().size());
+			//LOGGER.finer("number of physics objects: " + currentObjects.getObjects().size());
 
 			HashSet<Spatial> remainingObjects = new HashSet<>();
 			for (Iterator<Spatial> it = map.physicsObjects.getChildren().iterator(); it.hasNext(); )

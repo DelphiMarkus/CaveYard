@@ -97,54 +97,29 @@ public class ObjectsTree
 	 */
 	public void insertAndEmpty(ObjectsCell insertCell)
 	{
+		Vector2f p1 = insertCell.getPos().subtract(insertCell.getHalfSize());
+		Vector2f p2 = insertCell.getPos().add(insertCell.getHalfSize());
+		final QuadRange<Float> insertRange = pointsToRange(p1, p2);
 
-		for (Iterator<Spatial> it = insertCell.objects.iterator(); it.hasNext();)
+		List<ObjectsCell> cells = find(insertRange);
+		for (ObjectsCell cell: cells)
 		{
-			Spatial object = it.next();
-			insert(object);
-			it.remove();
-		}
+			final QuadRange<Float> range = pointsToRange(cell.getPos().subtract(cell.getHalfSize()),
+					cell.getPos().add(cell.getHalfSize()));
 
-//		Vector2f p1 = insertCell.getPos().subtract(insertCell.getHalfSize());
-//		Vector2f p2 = insertCell.getPos().add(insertCell.getHalfSize());
-//		final QuadRange<Float> insertRange = pointsToRange(p1, p2);
-//
-//		List<ObjectsCell> cells = find(insertRange);
-//		for (ObjectsCell cell: cells)
-//		{
-//			final QuadRange<Float> range = pointsToRange(cell.getPos().subtract(cell.getHalfSize()),
-//					cell.getPos().add(cell.getHalfSize()));
-//
-//			for (Iterator<Spatial> it = insertCell.objects.iterator(); it.hasNext();)
-//			{
-//				Spatial object = it.next();
-//
-//				final Vector2f pos = VecUtil.toXZVector(object.getWorldTranslation());
-//				final QuadPoint<Float> objectPoint = QuadPoint.fromVector2f(pos);
-//				if (range.contains(objectPoint))
-//				{
-//					it.remove();
-//					cell.objects.add(object);
-//				}
-//			}
-//		}
-//
-//		for (Iterator<Spatial> it = insertCell.objects.iterator(); it.hasNext();)
-//		{
-//			Spatial object = it.next();
-//			final Vector2f pos = VecUtil.toXZVector(object.getWorldTranslation());
-//			final QuadPoint<Float> objectPoint = QuadPoint.fromVector2f(pos);
-//
-//			if (!insertRange.contains(objectPoint))
-//			{
-//				insert(object);
-//				it.remove();
-//			}
-//			else
-//			{
-//				LOGGER.severe("Something went wrong... Don't know where to put " + objectPoint);
-//			}
-//		}
+			for (Iterator<Spatial> it = insertCell.objects.iterator(); it.hasNext();)
+			{
+				Spatial object = it.next();
+
+				final Vector2f pos = VecUtil.toXZVector(object.getWorldTranslation());
+				final QuadPoint<Float> objectPoint = QuadPoint.fromVector2f(pos);
+				if (range.contains(objectPoint))
+				{
+					it.remove();
+					cell.objects.add(object);
+				}
+			}
+		}
 	}
 
 	public ObjectsCell get(Vector2f pos)
