@@ -23,7 +23,6 @@ public class Cell
 
 	protected Node node;
 	protected Node terrainNode;
-	protected Node objectsNode;
 
 	protected RigidBodyControl terrainControl;
 	protected boolean loaded;
@@ -53,11 +52,6 @@ public class Cell
 	public Node getTerrainNode()
 	{
 		return terrainNode;
-	}
-
-	public Node getObjectsNode()
-	{
-		return objectsNode;
 	}
 
 	public Rect getArea()
@@ -140,10 +134,9 @@ public class Cell
 			}
 		}
 
-		if (objectsNode == null && terrainNode == null)
+		if (terrainNode == null)
 		{
-			LOGGER.finer("Model \"" + filename + "\" does not have terrain or " +
-					"objects node. Displaying nothing.");
+			LOGGER.finer("Model \"" + filename + "\" does not have terrain");
 		}
 
 		calculateTerrainShape();
@@ -167,7 +160,6 @@ public class Cell
 		{
 			node.detachAllChildren();
 			terrainNode = null;
-			objectsNode = null;
 			loaded = false;
 		}
 	}

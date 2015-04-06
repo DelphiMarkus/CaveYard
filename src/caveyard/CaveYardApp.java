@@ -133,14 +133,15 @@ public class CaveYardApp extends SimpleApplication
 		mapNode = currentMap.getMapNode();
 
 		// create a map control to update visible cells
-		MapLODControl mapLODControl = new MapLODControl(playerNode, 20, 5);
+		MapLODControl mapLODControl = new MapLODControl(playerNode, 30, 5);
 		mapNode.addControl(mapLODControl);
 
 		MapTerrainPhysicsControl mapPhysics = new MapTerrainPhysicsControl(bulletAppState.getPhysicsSpace());
 		mapNode.addControl(mapPhysics);
 
-		MapObjectsPhysicsControl objectsPhysics = new MapObjectsPhysicsControl(playerNode, 10, 0.5f, bulletAppState.getPhysicsSpace());
-		mapNode.addControl(objectsPhysics);
+		MapObjectsControl objectsControl = new MapObjectsControl(playerNode, 25, 10, 0.5f,
+				bulletAppState.getPhysicsSpace());
+		mapNode.addControl(objectsControl);
 
 		rootNode.attachChild(mapNode);
 

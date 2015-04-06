@@ -1,8 +1,8 @@
 package caveyard.map;
 
 import caveyard.map.math.Circle;
+import caveyard.util.VecUtil;
 import com.jme3.math.Vector2f;
-import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
@@ -158,19 +158,16 @@ public class MapLODControl extends AbstractControl
 	@Override
 	protected void controlUpdate(float tpf)
 	{
-		final Vector3f pos = player.getWorldTranslation();
-
-		final Vector2f pos2D = new Vector2f(pos.x, pos.z);
+		final Vector2f pos = VecUtil.toXZVector(player.getWorldTranslation());
 		// Only do an update if we moved since last update.
-		if (lastUpdatePos == null || pos2D.distance(lastUpdatePos) >= reloadDistance)
+		if (lastUpdatePos == null || pos.distance(lastUpdatePos) >= reloadDistance)
 		{
 			LOGGER.finer("Updating cells...");
 
 			map.terrain.detachAllChildren();
-			map.objects.detachAllChildren();
 			map.visibleCells.clear();
 
-			final Circle circle = new Circle(pos2D.x, pos2D.y, renderRadius);
+			final Circle circle = new Circle(pos.x, pos.y, renderRadius);
 			for (Cell cell : map.find(circle))
 			{
 				if (!cell.isLoaded())
@@ -185,16 +182,9 @@ public class MapLODControl extends AbstractControl
 				}
 			}
 
-			Vector2f p1 = pos2D.add(Vector2f.UNIT_XY.mult(-renderRadius));
-			Vector2f p2 = pos2D.add(Vector2f.UNIT_XY.mult(renderRadius));
-			for (Spatial object: map.objectsTree.findObjects(p1, p2))
-			{
-				map.objects.attachChild(object);
-			}
-
 			LOGGER.fine("Updated cells. Visible cells: " + map.visibleCells.size());
 
-			lastUpdatePos = pos2D;
+			lastUpdatePos = pos;
 
 			// tell MapTerrainPhysicsControl to do an update
 			mapNode.getMapPhysics().setNeedsUpdate(true);
