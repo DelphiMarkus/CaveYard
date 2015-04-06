@@ -5,15 +5,25 @@ import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.control.BetterCharacterControl;
+import com.jme3.collision.Collidable;
+import com.jme3.collision.CollisionResult;
+import com.jme3.collision.CollisionResults;
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.math.FastMath;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.Camera;
+import com.jme3.renderer.RenderManager;
+import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.control.AbstractControl;
+
+import java.util.logging.Logger;
 
 /**
  * This app state handles inputs from the keyboard and moves a player node
@@ -37,11 +47,13 @@ public class PlayerControlAppState extends AbstractAppState implements ActionLis
 	public static final String PLAYER_JUMP = "PLAYER_JUMP";
 	public static final String PLAYER_SPRINT = "PLAYER_SPRINT";
 
+	protected static final Logger LOGGER = Logger.getLogger(PlayerControlAppState.class.getName());
+
 	protected CaveYardApp app;
 
 	protected Node playerNode;
 	protected BetterCharacterControl playerControl;
-	protected Spatial cameraTarget;
+	protected Node cameraTarget;
 	protected ChaseCamera chaseCam;
 
 	protected boolean left;
@@ -65,7 +77,7 @@ public class PlayerControlAppState extends AbstractAppState implements ActionLis
 	 *
 	 * @param cameraTarget Target the chase camera will follow.
 	 */
-	public PlayerControlAppState(Spatial cameraTarget)
+	public PlayerControlAppState(Node cameraTarget)
 	{
 		this(cameraTarget, null);
 	}
@@ -83,7 +95,7 @@ public class PlayerControlAppState extends AbstractAppState implements ActionLis
 	 * @param playerControl Physical control of the player node. Will be
 	 *                         added to the player node automatically.
 	 */
-	public PlayerControlAppState(Spatial cameraTarget, BetterCharacterControl playerControl)
+	public PlayerControlAppState(Node cameraTarget, BetterCharacterControl playerControl)
 	{
 		this.playerControl = playerControl;
 		this.cameraTarget = cameraTarget;
@@ -104,6 +116,7 @@ public class PlayerControlAppState extends AbstractAppState implements ActionLis
 		this.app = (CaveYardApp) app;
 		this.app.getRootNode().attachChild(playerNode);
 		initChaseCam();
+		setupCameraCollision();
 
 		setEnabled(true);
 	}
@@ -123,6 +136,30 @@ public class PlayerControlAppState extends AbstractAppState implements ActionLis
 		chaseCam.setMinVerticalRotation(-FastMath.QUARTER_PI);
 
 		chaseCam.setDownRotateOnCloseViewOnly(false);
+	}
+
+	private class CameraCollisionControl extends AbstractControl
+	{
+		@Override
+		protected void controlUpdate(float tpf)
+		{
+			Camera camera = app.getCamera();
+			Vector3f camPos = camera.getLocation().subtract(cameraTarget.getWorldTranslation());
+			camPos.subtractLocal(chaseCam.getLookAtOffset());
+			avoidCamObstruction(cameraTarget, app.getMapNode(), camPos.clone(), camPos);
+			camera.setLocation(camPos.addLocal(cameraTarget.getWorldTranslation()).addLocal(chaseCam.getLookAtOffset()));
+		}
+
+		@Override
+		protected void controlRender(RenderManager rm, ViewPort vp)
+		{
+		}
+	}
+
+	private void setupCameraCollision()
+	{
+		CameraCollisionControl control = new CameraCollisionControl();
+		cameraTarget.addControl(control);
 	}
 
 	@Override
@@ -153,9 +190,9 @@ public class PlayerControlAppState extends AbstractAppState implements ActionLis
 	/**
 	 * Gets the spatial which is followed by the chase camera. It is attached
 	 * to the {@link #playerNode}.
-	 * @return Spalital followed by chase camera.
+	 * @return Node followed by chase camera.
 	 */
-	public Spatial getCameraTarget()
+	public Node getCameraTarget()
 	{
 		return cameraTarget;
 	}
@@ -262,10 +299,80 @@ public class PlayerControlAppState extends AbstractAppState implements ActionLis
 		}
 	}
 
+	/**
+	 * Move camPos closer to subject to avoid obstruction by the scene.
+	 *
+	 * @param subject what camera is looking at
+	 * @param scene the scene root
+	 * @param pov preferred translation of camera relative to subject
+	 * @param camPos translation of camera relative to subject
+	 */
+	private void avoidCamObstruction(Node subject, Node scene, Vector3f pov, Vector3f camPos)
+	{
+		Ray ray = new Ray();
+		ray.getOrigin().set(subject.getWorldTranslation());
+		ray.getDirection().set(pov);
+		ray.getDirection().normalizeLocal();
+		avoidCamObstruction(subject, scene, pov, camPos, pov.length(), ray);
+
+
+		/*
+		Camera cam = app.getCamera();
+
+		ray.getOrigin().set(subject.getWorldTranslation());
+		ray.getDirection().set(camPos);
+		ray.getDirection().addLocal(cam.getUp().mult(cam.getFrustumTop()));
+		ray.getDirection().addLocal(cam.getLeft().mult(cam.getFrustumLeft()));
+		ray.getDirection().normalizeLocal();
+		avoidCamObstruction(subject, scene, camPos, camPos, camPos.length(), ray);
+
+		ray.getOrigin().set(subject.getWorldTranslation());
+		ray.getDirection().set(camPos);
+		ray.getDirection().addLocal(cam.getUp().mult(cam.getFrustumTop()));
+		ray.getDirection().addLocal(cam.getLeft().mult(cam.getFrustumRight()));
+		ray.getDirection().normalizeLocal();
+		avoidCamObstruction(subject, scene, camPos, camPos, camPos.length(), ray);
+
+		ray.getOrigin().set(subject.getWorldTranslation());
+		ray.getDirection().set(camPos);
+		ray.getDirection().addLocal(cam.getUp().mult(cam.getFrustumBottom()));
+		ray.getDirection().addLocal(cam.getLeft().mult(cam.getFrustumLeft()));
+		ray.getDirection().normalizeLocal();
+		avoidCamObstruction(subject, scene, camPos, camPos, camPos.length(), ray);
+
+		ray.getOrigin().set(subject.getWorldTranslation());
+		ray.getDirection().set(camPos);
+		ray.getDirection().addLocal(cam.getUp().mult(cam.getFrustumBottom()));
+		ray.getDirection().addLocal(cam.getLeft().mult(cam.getFrustumRight()));
+		ray.getDirection().normalizeLocal();
+		avoidCamObstruction(subject, scene, camPos, camPos, camPos.length(), ray);*/
+	}
+
+	private void avoidCamObstruction(Node subject, Node scene, Vector3f pov, Vector3f camPos, float maxDist, Collidable shape)
+	{
+		CollisionResults collisionResults = new CollisionResults();
+		scene.collideWith(shape, collisionResults);
+		boolean blocked = false;
+		for (int p = 0; p < collisionResults.size(); p++) {
+			CollisionResult result = collisionResults.getCollision(p);
+			Spatial parent = result.getGeometry().getParent();
+			if (parent != subject) {
+				if (result.getDistance() <= maxDist) {
+					camPos.normalizeLocal().multLocal(result.getDistance() - 0.25f);
+					blocked = true;
+				}
+				break;
+			}
+		}
+		if (! blocked) {
+			camPos.set(pov);
+		}
+	}
+
 	@Override
 	public void update(float tpf)
 	{
-		app.getInputManager().setCursorVisible(false);
+		//app.getInputManager().setCursorVisible(false);
 
 		Vector3f modelForwardDir = app.getCamera().getDirection();
 		Vector3f modelLeftDir = app.getCamera().getLeft();

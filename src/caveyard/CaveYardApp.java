@@ -42,6 +42,7 @@ public class CaveYardApp extends SimpleApplication
 
 	protected MapManager mapManager;
 	protected Map currentMap;
+	protected MapNode mapNode;
 
 	protected DirectionalLight sun;
 	protected PointLight playerLight;
@@ -129,7 +130,7 @@ public class CaveYardApp extends SimpleApplication
 		currentMap = mapManager.loadMap("test_map1");
 		LOGGER.fine("Map loaded!");
 
-		MapNode mapNode = currentMap.getMapNode();
+		mapNode = currentMap.getMapNode();
 
 		// create a map control to update visible cells
 		MapLODControl mapLODControl = new MapLODControl(playerNode, 20, 5);
@@ -145,7 +146,7 @@ public class CaveYardApp extends SimpleApplication
 
 		// add light
 		playerLight = new PointLight();
-		playerLight.setRadius(100);
+		playerLight.setRadius(20);
 		rootNode.addLight(playerLight);
 
 		// create a node which position is copied to the light's position
@@ -159,14 +160,14 @@ public class CaveYardApp extends SimpleApplication
 		final int SHADOW_MAP_SIZE = 512;
 		PointLightShadowRenderer plsr = new PointLightShadowRenderer(assetManager, SHADOW_MAP_SIZE);
 		plsr.setLight(playerLight);
-		//viewPort.addProcessor(plsr);
+		viewPort.addProcessor(plsr);
 
 		PointLightShadowFilter plsf = new PointLightShadowFilter(assetManager, SHADOW_MAP_SIZE);
 		plsf.setLight(playerLight);
 		plsf.setEnabled(true);
 		FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
 		fpp.addFilter(plsf);
-		//viewPort.addProcessor(fpp);
+		viewPort.addProcessor(fpp);
 	}
 
 	@Override
@@ -177,5 +178,15 @@ public class CaveYardApp extends SimpleApplication
 	@Override
 	public void simpleRender(RenderManager rm)
 	{
+	}
+
+	public MapNode getMapNode()
+	{
+		return mapNode;
+	}
+
+	public Node getPlayerNode()
+	{
+		return playerNode;
 	}
 }
