@@ -176,7 +176,7 @@ public class MapObjectsControl extends AbstractControl
 				if (control == null)
 				{
 					CollisionShape shape = CollisionShapeFactory.createDynamicMeshShape(object);
-					control = new RigidBodyControl(shape, 10);
+					control = new RigidBodyControl(shape, 10);  // TODO: Remove stub; Set real weight
 					object.addControl(control);
 				}
 				physicsSpace.add(control);

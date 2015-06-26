@@ -280,7 +280,7 @@ public class DialogPlayer
 	 * Starts a dialog. All variables defined in the dialog definition are
 	 * reset. If specified, the "load" script will be evaluated.
 	 *
-	 * A DialogListener must be added befor calling this method. Otherwise
+	 * A DialogListener must be added before calling this method. Otherwise
 	 * an Exception is thrown.
 	 *
 	 * @throws UnknownPartIDException Thrown if start id of dialog is not valid.
@@ -497,4 +497,6 @@ public class DialogPlayer
 			interpretNext();
 		}
 	}
+
+	// TODO: Implement saving and loading persistent variables to a savegame
 }

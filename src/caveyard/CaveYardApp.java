@@ -18,6 +18,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.FogFilter;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -168,6 +169,13 @@ public class CaveYardApp extends SimpleApplication
 		plsf.setEnabled(true);
 		FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
 		fpp.addFilter(plsf);
+
+		FogFilter fog = new FogFilter();
+		fog.setFogColor(ColorRGBA.Black);
+		fog.setFogDistance(20);
+		fog.setFogDensity(1.0f);
+		fpp.addFilter(fog);
+
 		viewPort.addProcessor(fpp);
 	}
 

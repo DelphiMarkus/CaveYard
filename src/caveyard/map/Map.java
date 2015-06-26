@@ -95,11 +95,15 @@ public class Map
 			// Create cell and add it to the map
 			Cell cell = new Cell(cellType.getFile(), cellType.getNode(), pos, rect);
 			// Get offset and tell the cell about
-			if (!cellType.getOffset().isNil())
+			if (cellType.getOffset() != null)
 			{
 				CellType.Offset offset = cellType.getOffset().getValue();
 				Vector3f nodeOffset = new Vector3f(offset.getX(), offset.getY(), offset.getZ());
 				cell.setNodeOffset(nodeOffset);
+			}
+			else
+			{
+				cell.setNodeOffset(Vector3f.ZERO);
 			}
 
 			map.addCell(cell);

@@ -2,4 +2,5 @@
 
 <maps xmlns="caveyard.maps">
     <map id="test_map1" file="Data/map/test.map.xml"/>
+    <!-- <map id="test_map1" file="Data/map/test_big.map.xml"/> -->
 </maps>
