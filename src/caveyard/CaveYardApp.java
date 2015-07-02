@@ -4,6 +4,7 @@ import caveyard.assets.MapLoader;
 import caveyard.assets.ScriptLoader;
 import caveyard.map.*;
 import caveyard.states.PlayerControlAppState;
+import caveyard.util.TextManager;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.bullet.BulletAppState;
@@ -89,6 +90,8 @@ public class CaveYardApp extends SimpleApplication
 		initLoaders();
 
 		mapManager = MapManager.getInstance(assetManager);
+		TextManager textManager = TextManager.getInstance(assetManager);
+		LOGGER.info("Text: " + textManager.getText("text0"));
 		initTestMap();
 	}
 

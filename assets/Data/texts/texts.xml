@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<texts xmlns="caveyard.texts">
+	<include file="Data/texts/text1.xml"/>
+	<!--<include file="text2.xml"/>-->
+
+	<text uid="quest1_text1">
+		Hello! My name is Buddy, Some Buddy.
+	</text>
+</texts>

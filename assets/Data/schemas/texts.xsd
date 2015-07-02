@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		   elementFormDefault="qualified"
+		   xmlns="caveyard.texts"
+		   targetNamespace="caveyard.texts"
+		   version="1.0">
+
+	<xs:element name="texts">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:sequence minOccurs="0" maxOccurs="unbounded">
+					<xs:element name="include" type="includeType" maxOccurs="unbounded"/>
+				</xs:sequence>
+				<xs:sequence minOccurs="0" maxOccurs="unbounded">
+					<xs:element name="text" type="textType" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:complexType name="textType">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="uid" use="required" type="xs:NCName"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:complexType name="includeType">
+		<xs:attribute name="file" type="xs:string"/>
+	</xs:complexType>
+</xs:schema>
