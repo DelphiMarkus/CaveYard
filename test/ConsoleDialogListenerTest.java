@@ -3,9 +3,10 @@ import caveyard.dialog.DialogPlayer;
 import caveyard.dialog.DialogText;
 import caveyard.xml.dialog.Dialogs;
 
-import javax.script.*;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import javax.xml.bind.JAXB;
-import java.io.*;
+import java.io.File;
 import java.util.List;
 import java.util.Scanner;
 
