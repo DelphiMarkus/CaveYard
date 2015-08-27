@@ -7,7 +7,7 @@ public class QuestVariable
 {
 	public enum Type
 	{
-		STRING, BOOLEAN, INT, FLOAT, DOUBLE, CUSTOM;
+		STRING, BOOLEAN, INTEGER, FLOAT, DOUBLE, CUSTOM;
 	}
 
 	protected String name;

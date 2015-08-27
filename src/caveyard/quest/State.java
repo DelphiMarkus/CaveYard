@@ -25,17 +25,27 @@ public class State
 	}
 
 	public void enterState()
-	{}
+	{
+		stateInterface.enterState();
+	}
 
 	public void initState()
-	{}
+	{
+		stateInterface.initState();
+	}
 
 	public void stateCallback()
-	{}
+	{
+		stateInterface.callback();
+	}
 
 	public void deinitState()
-	{}
+	{
+		stateInterface.deinitState();
+	}
 
 	public void exitState()
-	{}
+	{
+		stateInterface.exitState();
+	}
 }

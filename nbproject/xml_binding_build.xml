@@ -67,5 +67,19 @@
         <copy todir="${build.generated.sources.dir}/jaxb">
             <fileset dir="build/generated/jaxbCache/TextsDefinition"/>
         </copy>
+        <mkdir dir="build/generated/jaxbCache/QuestsDefinition"/>
+        <xjc package="caveyard.xml.quests" destdir="build/generated/jaxbCache/QuestsDefinition" catalog="catalog.xml">
+            <classpath>
+                <pathelement location="${src.dir}"/>
+                <pathelement path="${jaxbwiz.xjcrun.classpath}"/>
+            </classpath>
+            <arg value="-xmlschema"/>
+            <schema file="xml-resources/jaxb/QuestsDefinition/quests.xsd"/>
+            <depends file="xml-resources/jaxb/QuestsDefinition/quests.xsd"/>
+            <produces dir="build/generated/jaxbCache/QuestsDefinition"/>
+        </xjc>
+        <copy todir="${build.generated.sources.dir}/jaxb">
+            <fileset dir="build/generated/jaxbCache/QuestsDefinition"/>
+        </copy>
     </target>
 </project>

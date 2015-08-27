@@ -3,6 +3,8 @@ package caveyard;
 import caveyard.assets.MapLoader;
 import caveyard.assets.ScriptLoader;
 import caveyard.map.*;
+import caveyard.quest.QuestManager;
+import caveyard.script.ScriptManager;
 import caveyard.states.PlayerControlAppState;
 import caveyard.util.TextManager;
 import com.jme3.app.SimpleApplication;
@@ -89,9 +91,14 @@ public class CaveYardApp extends SimpleApplication
 
 		initLoaders();
 
+		// initialize manager singletons
 		mapManager = MapManager.getInstance(assetManager);
 		TextManager textManager = TextManager.getInstance(assetManager);
-		LOGGER.info("Text: " + textManager.getText("text0"));
+		ScriptManager scriptManager = ScriptManager.getInstance(assetManager);
+
+		QuestManager questManager = QuestManager.getInstance(assetManager);
+		questManager.loadQuests("Data/quest/quests_test.xml");
+
 		initTestMap();
 	}
 

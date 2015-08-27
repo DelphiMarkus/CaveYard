@@ -49,4 +49,11 @@ public interface QuestInterface
 	 * @return the quest object controling this interface.
 	 */
 	Quest getQuest();
+
+	/***
+	 * Sets the quest this quest interface is assigned to. This method is used internally and
+	 * should not be called in a script.
+	 * @param quest this object's quest.
+	 */
+	void setQuest(Quest quest);
 }

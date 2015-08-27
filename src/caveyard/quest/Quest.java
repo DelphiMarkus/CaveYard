@@ -7,7 +7,7 @@ import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import javax.script.SimpleScriptContext;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -23,39 +23,74 @@ public class Quest implements Savable
 	protected HashMap<Integer, State> states;
 
 	protected int startState;
-	protected QuestStatus status;
+	protected QuestStatus defaultStatus;
+	protected QuestStatus status = QuestStatus.ABORTED;
 	protected int currentStateId;
 
 	protected ArrayList<QuestVariable> variables;
+
+	protected String scriptFilename;
+	protected String questInterfaceName;
 	protected QuestInterface questInterface;
 
 	protected ScriptEngine engine;
 	protected Bindings engineBindings;
 	protected SimpleScriptContext scriptContext;
 
-	public Quest(String questID, int startState, HashMap<Integer, State> states, ArrayList<QuestVariable> variables)
+	public Quest(String questID, int startState, QuestStatus defaultStatus, String scriptFilename,
+	             String questInterfaceName, ArrayList<QuestVariable> variables, HashMap<Integer, State> states)
 	{
 		this.questID = questID;
 		this.startState = startState;
+		this.defaultStatus = defaultStatus;
+		this.scriptFilename = scriptFilename;
+		this.questInterfaceName = questInterfaceName;
 		this.states = states;
 		this.variables = variables;
 	}
 
-	public void changeState(int newStateId)
+	public String getQuestID()
+	{
+		return questID;
+	}
+
+	public QuestInterface getQuestInterface()
+	{
+		return questInterface;
+	}
+
+	public int getStateId()
+	{
+		return currentStateId;
+	}
+
+	public void changeStateId(int newStateId)
 	{
 		if (newStateId != currentStateId)
 		{
 			State currentState = getCurrentState();
 			if (currentState != null)
 			{
-				currentState.deinitState();
-				currentState.exitState();
+				if (status == QuestStatus.ACTIVE)
+				{
+					currentState.deinitState();
+				}
+				if (status == QuestStatus.ACTIVE || status == QuestStatus.INACTIVE)
+				{
+					currentState.exitState();
+				}
 			}
 
 			currentStateId = newStateId;
 			currentState = getCurrentState();
-			currentState.enterState();
-			currentState.initState();
+			if (status == QuestStatus.ACTIVE)
+			{
+				currentState.enterState();
+			}
+			if (status == QuestStatus.ACTIVE || status == QuestStatus.INACTIVE)
+			{
+				currentState.initState();
+			}
 		}
 	}
 
@@ -66,21 +101,54 @@ public class Quest implements Savable
 
 	public void reset()
 	{
-		changeState(startState);
+		changeStateId(startState);
 	}
 
 
 	public void initQuest(ScriptEngine engine)
 	{
-		this.status = QuestStatus.INACTIVE;
-		changeState(this.startState);
-
 		this.engine = engine;
 		engineBindings = engine.createBindings();
 		scriptContext = new SimpleScriptContext();
 		scriptContext.setBindings(engineBindings, SimpleScriptContext.ENGINE_SCOPE);
 
+		try
+		{
+			Reader reader = new InputStreamReader(new FileInputStream(scriptFilename));
+			engine.eval(reader, scriptContext);
+		}
+		catch (FileNotFoundException e)
+		{
+			LOGGER.severe("Cannot init quest \"" + questID + "\": script file \"" + scriptFilename + "\" not found.");
+			LOGGER.throwing("Quest", "initQuest", e);
+			return;
+		}
+		catch (ScriptException e)
+		{
+			LOGGER.severe("Cannot init quest \"" + questID + "\": script file \"" + scriptFilename +
+					"\" cannot be evaluated.");
+			LOGGER.throwing("Quest", "initQuest", e);
+			return;
+		}
+
+		try
+		{
+			questInterface = (QuestInterface) engineBindings.get(questInterfaceName);
+		}
+		catch (ClassCastException e)
+		{
+			LOGGER.severe("Cannot init quest \"" + questID + "\": Quest interface does not implement QuestInterface.");
+			LOGGER.throwing("Quest", "initQuest", e);
+			return;
+		}
+
 		initVariables();
+
+		questInterface.setQuest(this);
+
+		this.status = defaultStatus;
+		changeStateId(this.startState);
+
 	}
 
 	protected void initVariables()
@@ -105,6 +173,59 @@ public class Quest implements Savable
 		}
 	}
 
+	public Object getVariableValue(String name)
+	{
+		return engineBindings.get(name);
+	}
+
+	public QuestStatus getStatus()
+	{
+		return this.status;
+	}
+
+	public void setStatus(QuestStatus status)
+	{
+		switch (this.status)
+		{
+			case ACTIVE:
+				switch (status)
+				{
+					case INACTIVE:
+					case FINISHED:
+					case ABORTED:
+						getCurrentState().deinitState();
+						break;
+				}
+				// FALL-TROUGH
+			case INACTIVE:
+				switch (status)
+				{
+					case ACTIVE:
+						getCurrentState().initState();
+						break;
+					case FINISHED:
+					case ABORTED:
+						getCurrentState().deinitState();
+						break;
+				}
+				break;
+			case FINISHED:
+			case ABORTED:
+				switch (status)
+				{
+					case INACTIVE:
+						getCurrentState().enterState();
+						break;
+					case ACTIVE:
+						getCurrentState().enterState();
+						getCurrentState().initState();
+						break;
+				}
+				break;
+		}
+		this.status = status;
+	}
+
 	protected boolean saveQuestVariable(QuestVariable var, OutputCapsule capsule)
 	{
 		Object value = engineBindings.get(var.getName());
@@ -116,7 +237,7 @@ public class Quest implements Savable
 				case BOOLEAN:
 					capsule.write((Boolean) value, var.getName(), false);
 					break;
-				case INT:
+				case INTEGER:
 					capsule.write((Integer) value, var.getName(), 0);
 					break;
 				case FLOAT:
@@ -159,7 +280,7 @@ public class Quest implements Savable
 				case BOOLEAN:
 					value = capsule.readBoolean(var.getName(), false);
 					break;
-				case INT:
+				case INTEGER:
 					value = capsule.readInt(var.getName(), 0);
 					break;
 				case FLOAT:

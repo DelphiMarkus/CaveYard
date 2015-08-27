@@ -6,4 +6,5 @@
     <system systemId="file:/home/maximilian/Java/CaveYard/assets/Data/schemas/dialog.xsd" uri="xml-resources/jaxb/dialog/dialog.xsd"/>
     <system systemId="file:/home/maximilian/Java/CaveYard/assets/Data/schemas/mapsSchema.xsd" uri="xml-resources/jaxb/MapsListing/mapsSchema.xsd"/>
     <system systemId="file:/home/maximilian/Java/CaveYard/assets/Data/schemas/texts.xsd" uri="xml-resources/jaxb/TextsDefinition/texts.xsd"/>
+    <system systemId="file:/home/maximilian/Java/CaveYard/assets/Data/schemas/quests.xsd" uri="xml-resources/jaxb/QuestsDefinition/quests.xsd"/>
 </catalog>
